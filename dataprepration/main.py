@@ -48,7 +48,7 @@ model.eval()
 
 # Load Test Image
 # url = "http://images.cocodataset.org/val2017/000000281759.jpg"
-# url = "https://img2.goodfon.com/wallpaper/nbig/6/f4/rossiya-priroda-pole-zelen.jpg"
+url = "https://img2.goodfon.com/wallpaper/nbig/6/f4/rossiya-priroda-pole-zelen.jpg"
 # stream = requests.get(url, stream=True).raw
 # imo = Image.open(stream)
 imo = Image.open('./img_099.png')
@@ -56,11 +56,18 @@ im = imo.resize((800, 600))
 
 h, w, c = np.array(imo).shape
 
-print("Height", h, "Width", w)
+if c == 4:
+    imo = Image.open('./img_099.png').convert('RGB')
+    im = imo.resize((800, 600))
+    h, w, c = np.array(imo).shape
+
+# print("Height", h, "Width", w)
 
 # Apply transform and convert image to batch
 # mean-std normalize the input image (batch-size: 1)
 img = transform(im).unsqueeze(0)  # [h, w, c] -> [1, c, h, w]
+
+# print(img.shape)
 
 # Generate output for image
 out = model(img)
@@ -85,22 +92,22 @@ pred_logits, pred_boxes = out["pred_logits"][keep][:, :len(
 # (torch.Size([above_threshold_preductions, classes(200)]), torch.Size([above_threshold_preductions, bb(4)]))
 
 
-# Draw predicted BB
-# im2 = im.copy()
+## Draw predicted BB
+# im2 = imo.copy()
 # drw = ImageDraw.Draw(im2)
 # for logits, box in zip(pred_logits, pred_boxes):
 #     cls = logits.argmax()
 #     if cls >= 200:
 #         continue
 #     label = COCO_NAMES[cls]
-#     box = box.cpu() * torch.Tensor([800, 600, 800, 600])
-#     x, y, w, h = box
-#     x0, x1 = x-w//2, x+w//2
-#     y0, y1 = y-h//2, y+h//2
+#     box = box.cpu() * torch.Tensor([w, h, w, h])
+#     x, y, wbb, hbb = box
+#     x0, x1 = x-wbb//2, x+wbb//2
+#     y0, y1 = y-hbb//2, y+hbb//2
 #     drw.rectangle([x0, y0, x1, y1], outline='red', width=3)
 #     drw.text((x0, y0), label, fill='white')
-#
-# im2
+
+# im2.show()
 
 ## Plot all the remaining masks (throshelded)
 # ncols = 2
@@ -121,7 +128,7 @@ result = postprocessor(out, torch.as_tensor(img.shape[-2:]).unsqueeze(0))[0]
 # The segmentation is stored in a special-format png
 panoptic_seg = Image.open(io.BytesIO(result['png_string'])).resize((w, h), Image.NEAREST)
 (wp, hp) = panoptic_seg.size
-print("Height Pan", hp, "Width Pan", wp)
+# print("Height Pan", hp, "Width Pan", wp)
 panoptic_seg = np.array(panoptic_seg, dtype=np.uint8).copy()
 # We retrieve the ids corresponding to each mask
 panoptic_seg_id = rgb2id(panoptic_seg)
@@ -139,7 +146,7 @@ panoptic_seg_id = rgb2id(panoptic_seg)
 ## Finally we color each mask individually
 # panoptic_seg[:, :, :] = 0
 # for id in range(panoptic_seg_id.max() + 1):
-#   panoptic_seg[panoptic_seg_id == id] = numpy.asarray(next(palette)) * 255
+#   panoptic_seg[panoptic_seg_id == id] = np.asarray(next(palette)) * 255
 # plt.figure(figsize=(10,10))
 # plt.imshow(panoptic_seg)
 # plt.axis('off')
