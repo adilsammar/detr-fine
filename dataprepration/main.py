@@ -49,9 +49,12 @@ model.eval()
 # Load Test Image
 # url = "http://images.cocodataset.org/val2017/000000281759.jpg"
 url = "https://img2.goodfon.com/wallpaper/nbig/6/f4/rossiya-priroda-pole-zelen.jpg"
-im = Image.open(requests.get(url, stream=True).raw).resize((800, 600))
+imo = Image.open(requests.get(url, stream=True).raw)
+im = imo.resize((800, 600))
 
-h, w, c = np.array(im).shape
+h, w, c = np.array(imo).shape
+
+print("Height", h, "Width", w)
 
 # Apply transform and convert image to batch
 # mean-std normalize the input image (batch-size: 1)
@@ -63,7 +66,7 @@ out = model(img)
 # out.keys()
 ## dict_keys(['pred_logits', 'pred_boxes', 'pred_masks'])
 
-print(out['pred_logits'].shape, out['pred_boxes'].shape)
+# print(out['pred_logits'].shape, out['pred_boxes'].shape)
 ## (torch.Size([batch, keys, classes]), torch.Size([batch, keys, bb(4)]))
 
 # Generate score
@@ -76,7 +79,7 @@ keep = scores > 0.85
 pred_logits, pred_boxes = out["pred_logits"][keep][:, :len(
     COCO_NAMES)-1], out["pred_boxes"][keep]
 
-print(pred_logits.shape, pred_boxes.shape)
+# print(pred_logits.shape, pred_boxes.shape)
 # (torch.Size([above_threshold_preductions, classes(200)]), torch.Size([above_threshold_preductions, bb(4)]))
 
 
@@ -114,12 +117,14 @@ print(pred_logits.shape, pred_boxes.shape)
 result = postprocessor(out, torch.as_tensor(img.shape[-2:]).unsqueeze(0))[0]
 
 # The segmentation is stored in a special-format png
-panoptic_seg = Image.open(io.BytesIO(result['png_string']))
+panoptic_seg = Image.open(io.BytesIO(result['png_string'])).resize((w, h), Image.NEAREST)
+(wp, hp) = panoptic_seg.size
+print("Height Pan", hp, "Width Pan", wp)
 panoptic_seg = np.array(panoptic_seg, dtype=np.uint8).copy()
 # We retrieve the ids corresponding to each mask
 panoptic_seg_id = rgb2id(panoptic_seg)
 
-print(result['segments_info'], panoptic_seg.shape, panoptic_seg_id.shape)
+# print(result['segments_info'], panoptic_seg.shape, panoptic_seg_id.shape)
 # For Example Image
 # ([{'area': 59747, 'category_id': 184, 'id': 0, 'isthing': False},
 #   {'area': 269818, 'category_id': 193, 'id': 1, 'isthing': False},
@@ -187,7 +192,7 @@ coco_output["images"].append(image_info)
 
 for id in np.unique(panoptic_seg_id):
     binary_masks[id, :, :] = panoptic_seg_id == id
-    annotation_info = convert_to_coco.main(binary_masks[id], (h, w), image_id, result['segments_info'][id]["category_id"], result['segments_info'][id]["id"], False)
+    annotation_info = convert_to_coco.main(binary_masks[id], None, image_id, result['segments_info'][id]["category_id"], result['segments_info'][id]["id"], False)
     if annotation_info is not None:
         coco_output["annotations"].append(annotation_info)
 
