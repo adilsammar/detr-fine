@@ -48,8 +48,10 @@ model.eval()
 
 # Load Test Image
 # url = "http://images.cocodataset.org/val2017/000000281759.jpg"
-url = "https://img2.goodfon.com/wallpaper/nbig/6/f4/rossiya-priroda-pole-zelen.jpg"
-imo = Image.open(requests.get(url, stream=True).raw)
+# url = "https://img2.goodfon.com/wallpaper/nbig/6/f4/rossiya-priroda-pole-zelen.jpg"
+# stream = requests.get(url, stream=True).raw
+# imo = Image.open(stream)
+imo = Image.open('./img_099.png')
 im = imo.resize((800, 600))
 
 h, w, c = np.array(imo).shape
@@ -186,11 +188,27 @@ coco_output = {
 
 image_id = 1
 
-image_info = coco_creator_tools.create_image_info(image_id, url, im.size)
+# Opening JSON file
+with open('test.json') as f:
+    # returns JSON object as 
+    # a dictionary
+    omask = json.load(f)
+
+# Create Original Segmented Image
+import overlay_custom_mask
+
+omask_image_id = overlay_custom_mask.get_overlayed_mask((h, w), omask)
+
+panoptic_seg_id[omask_image_id.astype(np.bool_)] = panoptic_seg_id.max() + 1
+
+image_info = coco_creator_tools.create_image_info(image_id, url, imo.size)
 
 coco_output["images"].append(image_info)
 
-for id in np.unique(panoptic_seg_id):
+for ans in omask["annotations"]:
+    coco_output["annotations"].append(ans)
+
+for id in np.unique(panoptic_seg_id)[:-1]: # Skip the last one as it is for custom mappings
     binary_masks[id, :, :] = panoptic_seg_id == id
     annotation_info = convert_to_coco.main(binary_masks[id], None, image_id, result['segments_info'][id]["category_id"], result['segments_info'][id]["id"], False)
     if annotation_info is not None:
