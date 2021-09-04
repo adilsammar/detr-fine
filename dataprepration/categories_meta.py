@@ -1,3 +1,5 @@
+import datetime
+
 COCO_CATEGORIES = [
     {"color": [220, 20, 60], "isthing": 1, "id": 1, "name": "person"},
     {"color": [119, 11, 32], "isthing": 1, "id": 2, "name": "bicycle"},
@@ -134,10 +136,39 @@ COCO_CATEGORIES = [
     {"color": [250, 141, 255], "isthing": 0, "id": 200, "name": "rug-merged"},
 ]
 
-COCO_NAMES = ['N/A']*201
+NEW_CATEGORIES = [{'color': [220, 20, 60], 'isthing': 0, 'id': 1, 'name': 'misc'},
+            {'color': [255, 255, 128], 'isthing': 0, 'id': 2, 'name': 'textile'},
+            {'color': [150, 100, 100], 'isthing': 0, 'id': 3, 'name': 'building'},
+            {'color': [168, 171, 172], 'isthing': 0, 'id': 4, 'name': 'rawmaterial'},
+            {'color': [146, 112, 198], 'isthing': 0, 'id': 5, 'name': 'furniture'},
+            {'color': [218, 88, 184], 'isthing': 0, 'id': 6, 'name': 'floor'},
+            {'color': [241, 129, 0], 'isthing': 0, 'id': 7, 'name': 'plant'},
+            {'color': [217, 17, 255], 'isthing': 0, 'id': 8, 'name': 'food'},
+            {'color': [124, 74, 181], 'isthing': 0, 'id': 9, 'name': 'ground'},
+            {'color': [193, 0, 92], 'isthing': 0, 'id': 10, 'name': 'structural'},
+            {'color': [60, 143, 255], 'isthing': 0, 'id': 11, 'name': 'water'},
+            {'color': [137, 54, 74], 'isthing': 0, 'id': 12, 'name': 'wall'},
+            {'color': [183, 121, 142], 'isthing': 0, 'id': 13, 'name': 'window'},
+            {'color': [146, 139, 141], 'isthing': 0, 'id': 14, 'name': 'ceiling'},
+            {'color': [70, 130, 180], 'isthing': 0, 'id': 15, 'name': 'sky'},
+            {'color': [64, 170, 64], 'isthing': 0, 'id': 16, 'name': 'solid'}]
+
+MAPPINGS = {1: 1, 2: 1, 3: 1, 4: 1, 5: 1, 6: 1, 7: 1, 8: 1, 9: 1, 10: 1, 11: 1, 13: 1, 14: 1, 15: 1, 16: 1, 17: 1, 18: 1,
+           19: 1, 20: 1, 21: 1, 22: 1, 23: 1, 24: 1, 25: 1, 27: 1, 28: 1, 31: 1, 32: 1, 33: 1, 34: 1, 35: 1, 36: 1,
+           37: 1, 38: 1, 39: 1, 40: 1, 41: 1, 42: 1, 43: 1, 44: 1, 46: 1, 47: 1, 48: 1, 49: 1, 50: 1, 51: 1, 52: 1,
+           53: 1, 54: 1, 55: 1, 56: 1, 57: 1, 58: 1, 59: 1, 60: 1, 61: 1, 62: 1, 63: 1, 64: 1, 65: 1, 67: 1, 70: 1,
+           72: 1, 73: 1, 74: 1, 75: 1, 76: 1, 77: 1, 78: 1, 79: 1, 80: 1, 81: 1, 82: 1, 84: 1, 85: 1, 86: 1, 87: 1,
+           88: 1, 89: 1, 90: 1, 92: 2, 93: 2, 95: 3, 100: 4, 107: 5, 109: 2, 112: 5, 118: 6, 119: 7, 122: 8, 125: 9,
+           128: 3, 130: 5, 133: 5, 138: 10, 141: 2, 144: 9, 145: 9, 147: 9, 148: 11, 149: 9, 151: 3, 154: 9, 155: 11,
+           156: 5, 159: 9, 161: 5, 166: 3, 168: 2, 171: 12, 175: 12, 176: 12, 177: 12, 178: 11, 180: 13, 181: 13,
+           184: 7, 185: 10, 186: 14, 187: 15, 188: 5, 189: 5, 190: 6, 191: 9, 192: 16, 193: 7, 194: 9, 195: 4, 196: 8,
+           197: 3, 198: 16, 199: 12, 200: 2}
+
+## Get a list of all categories
+
+COCO_NAMES = ['N/A'] * 201
 for c in COCO_CATEGORIES:
     COCO_NAMES[c['id']] = c['name']
-
 
 CLASSES = [
     'N/A', 'person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus',
@@ -160,6 +191,148 @@ CLASSES = [
 coco2d2 = {}
 count = 0
 for i, c in enumerate(CLASSES):
-  if c != "N/A":
-    coco2d2[i] = count
-    count+=1
+    if c != "N/A":
+        coco2d2[i] = count
+        count += 1
+
+# since we are treating all things as misc and that belongs to single color class, we can use colors of other things
+AVAILABLE_COLORS = [
+    [119, 11, 32], 
+    [0, 0, 142], 
+    [0, 0, 230], 
+    [106, 0, 228], 
+    [0, 60, 100],
+    [0, 80, 100], 
+    [0, 0, 70],
+    [0, 0, 192], 
+    [250, 170, 30], 
+    [100, 170, 30], 
+    [220, 220, 0], 
+    [175, 116, 175], 
+    [250, 0, 30],
+    [165, 42, 42], 
+    [255, 77, 255], 
+    [0, 226, 252], 
+    [182, 182, 255], 
+    [0, 82, 0], 
+    [120, 166, 157],
+    [110, 76, 0], 
+    [174, 57, 255], 
+    [199, 100, 0], 
+    [72, 0, 118], 
+    [255, 179, 240], 
+    [0, 125, 92],
+    [209, 0, 151], 
+    [188, 208, 182], 
+    [0, 220, 176],
+    [255, 99, 164], 
+    [92, 0, 73], 
+    [133, 129, 255],
+    [78, 180, 255], 
+    [0, 228, 0], 
+    [174, 255, 243], 
+    [45, 89, 255], 
+    [134, 134, 103], 
+    [145, 148, 174],
+    [255, 208, 186], 
+    [197, 226, 255], 
+    [171, 134, 1], 
+    [109, 63, 54], 
+    [207, 138, 255], 
+    [151, 0, 95],
+    [9, 80, 61], 
+    [84, 105, 51], 
+    [74, 65, 105], 
+    [166, 196, 102], 
+    [208, 195, 210], 
+    [255, 109, 65],
+    [0, 143, 149], 
+    [179, 0, 194], 
+    [209, 99, 106], 
+    [5, 121, 0], 
+    [227, 255, 205]
+]
+
+
+CUSTOM_CATEGORIES_NAMES = [
+    "aac_blocks",
+    "adhesives",
+    "ahus",
+    "aluminium_frames_for_false_ceiling",
+    "chiller",
+    "concrete_mixer_machine",
+    "concrete_pump",
+    "control_panel",
+    "cu_piping",
+    "distribution_transformer",
+    "dump_truck_tipper_truck",
+    "emulsion_paint",
+    "enamel_paint",
+    "fine_aggregate",
+    "fire_buckets",
+    "fire_extinguishers",
+    "glass_wool",
+    "grader",
+    "hoist",
+    "hollow_concrete_blocks",
+    "hot_mix_plant",
+    "hydra_crane",
+    "interlocked_switched_socket",
+    "junction_box",
+    "lime",
+    "marble",
+    "metal_primer",
+    "pipe_fittings",
+    "rcc_hume_pipes",
+    "refrigerant_gas",
+    "river_sand",
+    "rmc_batching_plant",
+    "rmu_units",
+    "sanitary_fixtures",
+    "skid_steer_loader",
+    "smoke_detectors",
+    "split_units",
+    "structural_steel_channel",
+    "switch_boards_and_switches",
+    "texture_paint",
+    "threaded_rod",
+    "transit_mixer",
+    "vcb_panel",
+    "vitrified_tiles",
+    "vrf_units",
+    "water_tank",
+    "wheel_loader",
+    "wood_primer"
+]
+
+INFO = {
+    "description": "Example Dataset",
+    "url": "https://github.com/adilsammar/custom_coco_dataset",
+    "version": "0.1.0",
+    "year": 2021,
+    "contributor": "adilsammar",
+    "date_created": datetime.datetime.utcnow().isoformat(' ')
+}
+
+LICENSES = [
+    {
+        "id": 1,
+        "name": "Attribution-NonCommercial-ShareAlike License",
+        "url": "http://creativecommons.org/licenses/by-nc-sa/2.0/"
+    }
+]
+
+category_id = 17
+available_color_id = 0
+for category in CUSTOM_CATEGORIES_NAMES:
+    NEW_CATEGORIES.append({'color': AVAILABLE_COLORS[available_color_id], 'isthing': 1, 'id': category_id, 'name': category})
+    category_id += 1
+    available_color_id += 1
+
+cat2id = {
+    category['name']: category['id'] for category in NEW_CATEGORIES
+}
+
+id2cat = {
+    id: name for id, name in cat2id
+}
