@@ -334,5 +334,5 @@ cat2id = {
 }
 
 id2cat = {
-    id: name for id, name in cat2id
+    id: name for id, name in cat2id.items()
 }

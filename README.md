@@ -15,3 +15,8 @@ A: We apply Einstein summation convention, to convert `bqnc,bnchw->bqnhw`
 Q: Then we concatenate these maps with Res5 Block
 
 A: These features are comming from backbone feature layers.
+
+
+References: 
+
+* https://github.com/waspinator/pycococreator
