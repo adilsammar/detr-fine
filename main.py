@@ -16,10 +16,10 @@ import numpy as np
 import torch
 import wandb
 
-from dataset.cts_evaluate import SmoothedValue, MetricLogger
+from dataset.evaluator import SmoothedValue, MetricLogger
 from model.detr import build_model
 from dataset.cts_dataset import build_dataset
-from dataset.cts_evaluate import collate_fn, evaluate, save_on_master
+from dataset.evaluator import collate_fn, evaluate, save_on_master
 
 seed = 42
 
