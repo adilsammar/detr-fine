@@ -22,7 +22,9 @@ import wandb
 
 
 from utils.utils import nested_tensor_from_tensor_list
-from dataset.cts_dataset import int2imgid
+# from dataset.cts_dataset import int2imgid
+from dataprepration.categories_meta import id2cat
+
 
 class PanopticEvaluator(object):
     def __init__(self, ann_file, ann_folder, output_dir="panoptic_eval"):
@@ -74,7 +76,6 @@ class SmoothedValue(object):
         """
         return
 
-
     @property
     def median(self):
         d = torch.tensor(list(self.deque))
@@ -105,14 +106,17 @@ class SmoothedValue(object):
             max=self.max,
             value=self.value)
 
+
 def collate_fn(batch):
     batch = list(zip(*batch))
     batch[0] = nested_tensor_from_tensor_list(batch[0])
     return tuple(batch)
 
+
 def save_on_master(*args, **kwargs):
     torch.save(*args, **kwargs)
-        
+
+
 class MetricLogger(object):
     def __init__(self, delimiter="\t"):
         self.meters = defaultdict(SmoothedValue)
@@ -202,60 +206,24 @@ class MetricLogger(object):
         print('{} Total time: {} ({:.4f} s / it)'.format(
             header, total_time_str, total_time / len(iterable)))
 
-def log_class_chart(results):
-    id2name = {  
-        0: 'unlabeled'           ,
-        1: 'ego vehicle'         ,
-        2: 'rectification border',
-        3: 'out of roi'          ,
-        4: 'static'              ,
-        5: 'dynamic'             ,
-        6: 'ground'              ,
-        7: 'road'                ,
-        8: 'sidewalk'            ,
-        9: 'parking'             ,
-        10: 'rail track'          ,
-        11: 'building'            ,
-        12: 'wall'                ,
-        13: 'fence'               ,
-        14: 'guard rail'          ,
-        15: 'bridge'              ,
-        16: 'tunnel'              ,
-        17: 'pole'                ,
-        18: 'polegroup'           ,
-        19: 'traffic light'       ,
-        20: 'traffic sign'        ,
-        21: 'vegetation'          ,
-        22: 'terrain'             ,
-        23: 'sky'                 ,
-        24: 'person'              ,
-        25: 'rider'               ,
-        26: 'car'                 ,
-        27: 'truck'               ,
-        28: 'bus'                 ,
-        29: 'caravan'             ,
-        30: 'trailer'             ,
-        31: 'train'               ,
-        32: 'motorcycle'          ,
-        33: 'bicycle'             
-    }
 
+def log_class_chart(results):
     cl = results['per_class']
 
     plt.figure(figsize=(10, 20), dpi=80)
 
     for k in cl.keys():
         c = cl[k]
-        plt.barh(id2name[k]+'_pq', c['pq'], color = 'violet')
-        plt.barh(id2name[k]+'_sq', c['sq'], color = 'red')
-        plt.barh(id2name[k]+'_rq', c['rq'], color = 'blue')
+        plt.barh(id2cat[k]+'_pq', c['pq'], color='violet')
+        plt.barh(id2cat[k]+'_sq', c['sq'], color='red')
+        plt.barh(id2cat[k]+'_rq', c['rq'], color='blue')
 
     plt.savefig('chart.png')
     plt.show()
     wandb.log({"chart": wandb.Image(Image.open('chart.png'))})
 
 @torch.no_grad()
-def evaluate(model, criterion, postprocessors, data_loader, device, output_dir):
+def evaluate(model, criterion, postprocessors, data_loader, base_ds, device, output_dir):
     model.eval()
     criterion.eval()
 
@@ -270,7 +238,7 @@ def evaluate(model, criterion, postprocessors, data_loader, device, output_dir):
             data_loader.dataset.ann_folder,
             output_dir=os.path.join(output_dir, "panoptic_eval"),
         )
-        
+
     for samples, targets in metric_logger.log_every(data_loader, 10, header):
         samples = samples.to(device)
         targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
@@ -295,13 +263,13 @@ def evaluate(model, criterion, postprocessors, data_loader, device, output_dir):
         if 'segm' in postprocessors.keys():
             target_sizes = torch.stack([t["size"] for t in targets], dim=0)
             results = postprocessors['segm'](results, outputs, orig_target_sizes, target_sizes)
-        res = {int2imgid(target['image_id'].item()): output for target, output in zip(targets, results)}
+        res = {target['image_id'].item(): output for target, output in zip(targets, results)}
 
         if panoptic_evaluator is not None:
             res_pano = postprocessors["panoptic"](outputs, target_sizes, orig_target_sizes)
             for i, target in enumerate(targets):
-                image_id = int2imgid(target["image_id"].item())
-                file_name = f"{image_id}.png"
+                image_id = target["image_id"].item()
+                file_name = f"{image_id:012d}.png"
                 res_pano[i]["image_id"] = image_id
                 res_pano[i]["file_name"] = file_name
 
@@ -317,7 +285,7 @@ def evaluate(model, criterion, postprocessors, data_loader, device, output_dir):
         panoptic_res = panoptic_evaluator.summarize()
     log_class_chart(panoptic_res)
     stats = {k: meter.global_avg for k, meter in metric_logger.meters.items()}
-
+    
     if panoptic_res is not None:
         stats['PQ_all'] = panoptic_res["All"]
         stats['PQ_th'] = panoptic_res["Things"]
