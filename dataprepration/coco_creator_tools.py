@@ -69,9 +69,7 @@ def create_image_info(image_id, file_name, image_size,
             "width": image_size[0],
             "height": image_size[1],
             "date_captured": date_captured,
-            "license": license_id,
-            "coco_url": coco_url,
-            "flickr_url": flickr_url
+            "license": license_id
     }
 
     return image_info
