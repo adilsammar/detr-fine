@@ -1,13 +1,13 @@
-#@title Model - Segmentation { form-width: "25%" }
+# Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved
 """
 This file provides the definition of the convolutional heads used to predict masks, as well as the losses
 """
 import io
 from collections import defaultdict
-from typing import Optional, List
+from typing import List, Optional
 
 import torch
-from torch import nn
+import torch.nn as nn
 import torch.nn.functional as F
 from torch import Tensor
 from PIL import Image
@@ -260,7 +260,6 @@ class PostProcessPanoptic(nn.Module):
             target_sizes: This is a list of tuples (or torch tensors) corresponding to the requested final size
                           of each prediction. If left to None, it will default to the processed_sizes
             """
-
         if target_sizes is None:
             target_sizes = processed_sizes
         assert len(processed_sizes) == len(target_sizes)
@@ -331,7 +330,6 @@ class PostProcessPanoptic(nn.Module):
                     area.append(m_id.eq(i).sum().item())
                 return area, seg_img
 
-
             area, seg_img = get_ids_area(cur_masks, cur_scores, dedup=True)
             if cur_classes.numel() > 0:
                 # We know filter empty masks as long as we find some
@@ -339,7 +337,6 @@ class PostProcessPanoptic(nn.Module):
                     filtered_small = torch.as_tensor(
                         [area[i] <= 4 for i, c in enumerate(cur_classes)], dtype=torch.bool, device=keep.device
                     )
-
                     if filtered_small.any().item():
                         cur_scores = cur_scores[~filtered_small]
                         cur_classes = cur_classes[~filtered_small]
@@ -351,12 +348,8 @@ class PostProcessPanoptic(nn.Module):
             else:
                 cur_classes = torch.ones(1, dtype=torch.long, device=cur_classes.device)
 
-            def clamp(n, minn, maxn):
-                return max(min(maxn, n), minn)
-
             segments_info = []
             for i, a in enumerate(area):
-                #cat = clamp(cur_classes[i].item(), 0, 33)
                 cat = cur_classes[i].item()
                 segments_info.append({"id": i, "isthing": self.is_thing_map[cat], "category_id": cat, "area": a})
             del cur_classes
