@@ -92,7 +92,7 @@ except Exception as e:
 # set if you plan to log on wandb
 ENABLE_WANDB = True
 # if set not train from scratch (detre pretrained on COCO)
-used_artifact = "2_2_attentionfreeze_aux:latest"
+# used_artifact = "2_2_attentionfreeze_aux:latest"
 wandb_experiment_name = "2_2_1_transf_unfreeze_aux"  # set if starting a new run
 # set to None if starting a new run
 run_id = None
