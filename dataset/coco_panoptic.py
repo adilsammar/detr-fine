@@ -70,7 +70,7 @@ class CocoPanoptic:
         target["size"] = torch.as_tensor([int(h), int(w)])
         target["orig_size"] = torch.as_tensor([int(h), int(w)])
         if "segments_info" in ann_info:
-            for name in ["iscrowd", "area"]:
+            for name in ["iscroud", "area"]:
                 target[name] = torch.tensor(
                     [ann[name] for ann in ann_info["segments_info"]]
                 )
