@@ -7,7 +7,7 @@ import torch
 from PIL import Image
 
 from panopticapi.utils import rgb2id
-from utils.utils import masks_to_boxes
+from utils.utils import masks_to_boxes, box_xywh_to_xyxy, box_xyxy_to_cxcywh
 
 from dataset.utils import make_coco_transforms
 
@@ -21,7 +21,8 @@ class CocoPanoptic:
 
         # sort 'images' field so that they are aligned with 'annotations'
         # i.e., in alphabetical order
-        self.coco["images"] = sorted(self.coco["images"], key=lambda x: x["id"])
+        self.coco["images"] = sorted(
+            self.coco["images"], key=lambda x: x["id"])
         # sanity check
         if "annotations" in self.coco:
             for img, ann in zip(self.coco["images"], self.coco["annotations"]):
@@ -39,7 +40,8 @@ class CocoPanoptic:
             if "annotations" in self.coco
             else self.coco["images"][idx]
         )
-        img_path = Path(self.img_folder) / ann_info["file_name"].replace(".png", ".jpg")
+        img_path = Path(self.img_folder) / \
+            ann_info["file_name"].replace(".png", ".jpg")
         ann_path = Path(self.ann_folder) / ann_info["file_name"]
 
         img = Image.open(img_path).convert("RGB")
@@ -58,6 +60,7 @@ class CocoPanoptic:
             )
 
         target = {}
+        target['img'] = img
         target["image_id"] = torch.tensor(
             [ann_info["image_id"] if "image_id" in ann_info else ann_info["id"]]
         )
@@ -65,10 +68,23 @@ class CocoPanoptic:
             target["masks"] = masks
         target["labels"] = labels
 
-        target["boxes"] = masks_to_boxes(masks)
+        # target["boxes"] = masks_to_boxes(masks)
+
+        target["boxes"] = box_xywh_to_xyxy(torch.tensor(
+            [ann["bbox"] for ann in ann_info["segments_info"]],
+            dtype=torch.int64,
+        ))
+
+        target["orig_boxes"] = torch.tensor(
+            [ann["bbox"] for ann in ann_info["segments_info"]],
+            dtype=torch.int64,
+        )
+
+        target['xyxy_boxes'] = target["boxes"]
 
         target["size"] = torch.as_tensor([int(h), int(w)])
         target["orig_size"] = torch.as_tensor([int(h), int(w)])
+
         if "segments_info" in ann_info:
             for name in ["iscroud", "area"]:
                 target[name] = torch.tensor(

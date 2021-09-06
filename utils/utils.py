@@ -42,6 +42,12 @@ def box_cxcywh_to_xyxy(x):
     return torch.stack(b, dim=-1)
 
 
+def box_xywh_to_xyxy(x):
+    xs, ys, w, h = x.unbind(-1)
+    b = [xs, ys, (xs + w), (ys + h)]
+    return torch.stack(b, dim=-1)
+
+
 # modified from torchvision to also return the union
 
 
@@ -103,19 +109,9 @@ def interpolate(
     This will eventually be supported natively by PyTorch, and this
     class can go away.
     """
-    if float(torchvision.__version__[:3]) < 0.7:
-        if input.numel() > 0:
-            return torch.nn.functional.interpolate(
-                input, size, scale_factor, mode, align_corners
-            )
-
-        output_shape = _output_size(2, input, size, scale_factor)
-        output_shape = list(input.shape[:-2]) + list(output_shape)
-        return _new_empty_tensor(input, output_shape)
-    else:
-        return torchvision.ops.misc.interpolate(
-            input, size, scale_factor, mode, align_corners
-        )
+    return torchvision.ops.misc.interpolate(
+        input, size, scale_factor, mode, align_corners
+    )
 
 
 def nested_tensor_from_tensor_list(tensor_list: List[Tensor]):

@@ -264,7 +264,6 @@ def train_one_epoch(
 def train():
     if args.frozen_weights is not None:
         assert args.masks, "Frozen training is meant for segmentation only"
-    print(args)
 
     model, criterion, postprocessors = build_pretrained_model(args)
     model.to(device)
