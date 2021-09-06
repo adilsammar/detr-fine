@@ -74,7 +74,7 @@ args.lr = 1e-4
 args.weight_decay = 1e-4
 args.lr_backbone = 0  # 0 means frozen backbone
 args.batch_size = 1
-args.epochs = 300
+args.epochs = 2
 args.lr_drop = 200
 args.clip_max_norm = 0.1
 
@@ -92,8 +92,9 @@ except Exception as e:
 # set if you plan to log on wandb
 ENABLE_WANDB = True
 # if set not train from scratch (detre pretrained on COCO)
-# used_artifact = "2_2_attentionfreeze_aux:latest"
-wandb_experiment_name = "2_2_1_transf_unfreeze_aux"  # set if starting a new run
+used_artifact = None # "2_2_attentionfreeze_aux:latest"
+# set if starting a new run
+wandb_experiment_name = "2_2_1_transf_unfreeze_aux"
 # set to None if starting a new run
 run_id = None
 
