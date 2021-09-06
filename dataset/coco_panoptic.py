@@ -101,18 +101,18 @@ def build(image_set, args):
     ), f"provided COCO path {ann_folder_root} does not exist"
     mode = "panoptic"
     PATHS = {
-        "train": ("train2017", Path("annotations") / f"{mode}_train2017.json"),
-        "val": ("val2017", Path("annotations") / f"{mode}_val2017.json"),
+        "train": ("images", "masks", f"{mode}.json"),
+        "val": ("images", "masks", f"val_{mode}.json"),
     }
 
-    img_folder, ann_file = PATHS[image_set]
+    img_folder, ann_folder, ann_file = PATHS[image_set]
     img_folder_path = img_folder_root / img_folder
-    ann_folder = ann_folder_root / f"{mode}_{img_folder}"
+    ann_folder_path = ann_folder_root / ann_folder
     ann_file = ann_folder_root / ann_file
 
     dataset = CocoPanoptic(
         img_folder_path,
-        ann_folder,
+        ann_folder_path,
         ann_file,
         transforms=make_coco_transforms(image_set),
         return_masks=args.masks,

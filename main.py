@@ -19,7 +19,7 @@ import wandb
 
 from dataset.evaluator import SmoothedValue, MetricLogger
 from model.detr import build_model
-from dataset.cts_dataset import build_dataset
+from dataset.construction_dataset import build_dataset
 from dataset.evaluator import collate_fn, evaluate, save_on_master
 
 seed = 42
@@ -66,9 +66,9 @@ args.dice_loss_coef = 1
 args.giou_loss_coef = 2
 args.eos_coef = 0.1
 # Dataset
-args.dataset_file = "coco_panoptic"  # cityscape
-args.coco_path = ""
-args.coco_panoptic_path = ""
+args.dataset_file = "coco_panoptic"  # construction
+args.coco_path = "./data"
+args.coco_panoptic_path = "./data"
 # Training
 args.lr = 1e-4
 args.weight_decay = 1e-4

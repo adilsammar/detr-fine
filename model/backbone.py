@@ -7,7 +7,7 @@ from torch import nn
 from torchvision.models._utils import IntermediateLayerGetter
 from typing import Dict, List
 from utils.utils import NestedTensor
-from embedding import build_position_encoding
+from model.embedding import build_position_encoding
 
 
 class FrozenBatchNorm2d(torch.nn.Module):
