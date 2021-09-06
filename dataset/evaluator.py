@@ -22,6 +22,7 @@ import wandb
 
 
 from utils.utils import nested_tensor_from_tensor_list
+
 # from dataset.cts_dataset import int2imgid
 from dataprepration.categories_meta import id2cat
 
@@ -49,7 +50,12 @@ class PanopticEvaluator(object):
         predictions_json = os.path.join(self.output_dir, "predictions.json")
         with open(predictions_json, "w") as f:
             f.write(json.dumps(json_data))
-        return pq_compute(self.gt_json, predictions_json, gt_folder=self.gt_folder, pred_folder=self.output_dir)
+        return pq_compute(
+            self.gt_json,
+            predictions_json,
+            gt_folder=self.gt_folder,
+            pred_folder=self.output_dir,
+        )
 
 
 class SmoothedValue(object):
@@ -104,7 +110,8 @@ class SmoothedValue(object):
             avg=self.avg,
             global_avg=self.global_avg,
             max=self.max,
-            value=self.value)
+            value=self.value,
+        )
 
 
 def collate_fn(batch):
@@ -134,15 +141,14 @@ class MetricLogger(object):
             return self.meters[attr]
         if attr in self.__dict__:
             return self.__dict__[attr]
-        raise AttributeError("'{}' object has no attribute '{}'".format(
-            type(self).__name__, attr))
+        raise AttributeError(
+            "'{}' object has no attribute '{}'".format(type(self).__name__, attr)
+        )
 
     def __str__(self):
         loss_str = []
         for name, meter in self.meters.items():
-            loss_str.append(
-                "{}: {}".format(name, str(meter))
-            )
+            loss_str.append("{}: {}".format(name, str(meter)))
         return self.delimiter.join(loss_str)
 
     def synchronize_between_processes(self):
@@ -155,31 +161,35 @@ class MetricLogger(object):
     def log_every(self, iterable, print_freq, header=None):
         i = 0
         if not header:
-            header = ''
+            header = ""
         start_time = time.time()
         end = time.time()
-        iter_time = SmoothedValue(fmt='{avg:.4f}')
-        data_time = SmoothedValue(fmt='{avg:.4f}')
-        space_fmt = ':' + str(len(str(len(iterable)))) + 'd'
+        iter_time = SmoothedValue(fmt="{avg:.4f}")
+        data_time = SmoothedValue(fmt="{avg:.4f}")
+        space_fmt = ":" + str(len(str(len(iterable)))) + "d"
         if torch.cuda.is_available():
-            log_msg = self.delimiter.join([
-                header,
-                '[{0' + space_fmt + '}/{1}]',
-                'eta: {eta}',
-                '{meters}',
-                'time: {time}',
-                'data: {data}',
-                'max mem: {memory:.0f}'
-            ])
+            log_msg = self.delimiter.join(
+                [
+                    header,
+                    "[{0" + space_fmt + "}/{1}]",
+                    "eta: {eta}",
+                    "{meters}",
+                    "time: {time}",
+                    "data: {data}",
+                    "max mem: {memory:.0f}",
+                ]
+            )
         else:
-            log_msg = self.delimiter.join([
-                header,
-                '[{0' + space_fmt + '}/{1}]',
-                'eta: {eta}',
-                '{meters}',
-                'time: {time}',
-                'data: {data}'
-            ])
+            log_msg = self.delimiter.join(
+                [
+                    header,
+                    "[{0" + space_fmt + "}/{1}]",
+                    "eta: {eta}",
+                    "{meters}",
+                    "time: {time}",
+                    "data: {data}",
+                ]
+            )
         MB = 1024.0 * 1024.0
         for obj in iterable:
             data_time.update(time.time() - end)
@@ -189,38 +199,54 @@ class MetricLogger(object):
                 eta_seconds = iter_time.global_avg * (len(iterable) - i)
                 eta_string = str(datetime.timedelta(seconds=int(eta_seconds)))
                 if torch.cuda.is_available():
-                    print(log_msg.format(
-                        i, len(iterable), eta=eta_string,
-                        meters=str(self),
-                        time=str(iter_time), data=str(data_time),
-                        memory=torch.cuda.max_memory_allocated() / MB))
+                    print(
+                        log_msg.format(
+                            i,
+                            len(iterable),
+                            eta=eta_string,
+                            meters=str(self),
+                            time=str(iter_time),
+                            data=str(data_time),
+                            memory=torch.cuda.max_memory_allocated() / MB,
+                        )
+                    )
                 else:
-                    print(log_msg.format(
-                        i, len(iterable), eta=eta_string,
-                        meters=str(self),
-                        time=str(iter_time), data=str(data_time)))
+                    print(
+                        log_msg.format(
+                            i,
+                            len(iterable),
+                            eta=eta_string,
+                            meters=str(self),
+                            time=str(iter_time),
+                            data=str(data_time),
+                        )
+                    )
             i += 1
             end = time.time()
         total_time = time.time() - start_time
         total_time_str = str(datetime.timedelta(seconds=int(total_time)))
-        print('{} Total time: {} ({:.4f} s / it)'.format(
-            header, total_time_str, total_time / len(iterable)))
+        print(
+            "{} Total time: {} ({:.4f} s / it)".format(
+                header, total_time_str, total_time / len(iterable)
+            )
+        )
 
 
 def log_class_chart(results):
-    cl = results['per_class']
+    cl = results["per_class"]
 
     plt.figure(figsize=(10, 20), dpi=80)
 
     for k in cl.keys():
         c = cl[k]
-        plt.barh(id2cat[k]+'_pq', c['pq'], color='violet')
-        plt.barh(id2cat[k]+'_sq', c['sq'], color='red')
-        plt.barh(id2cat[k]+'_rq', c['rq'], color='blue')
+        plt.barh(id2cat[k] + "_pq", c["pq"], color="violet")
+        plt.barh(id2cat[k] + "_sq", c["sq"], color="red")
+        plt.barh(id2cat[k] + "_rq", c["rq"], color="blue")
 
-    plt.savefig('chart.png')
+    plt.savefig("chart.png")
     plt.show()
-    wandb.log({"chart": wandb.Image(Image.open('chart.png'))})
+    wandb.log({"chart": wandb.Image(Image.open("chart.png"))})
+
 
 @torch.no_grad()
 def evaluate(model, criterion, postprocessors, data_loader, device, output_dir):
@@ -228,11 +254,13 @@ def evaluate(model, criterion, postprocessors, data_loader, device, output_dir):
     criterion.eval()
 
     metric_logger = MetricLogger(delimiter="  ")
-    metric_logger.add_meter('class_error', SmoothedValue(window_size=1, fmt='{value:.2f}'))
-    header = 'Test:'
+    metric_logger.add_meter(
+        "class_error", SmoothedValue(window_size=1, fmt="{value:.2f}")
+    )
+    header = "Test:"
 
     panoptic_evaluator = None
-    if 'panoptic' in postprocessors.keys():
+    if "panoptic" in postprocessors.keys():
         panoptic_evaluator = PanopticEvaluator(
             data_loader.dataset.ann_file,
             data_loader.dataset.ann_folder,
@@ -249,24 +277,37 @@ def evaluate(model, criterion, postprocessors, data_loader, device, output_dir):
 
         # reduce losses over all GPUs for logging purposes
         loss_dict_reduced = loss_dict
-        loss_dict_reduced_scaled = {k: v * weight_dict[k]
-                                    for k, v in loss_dict_reduced.items() if k in weight_dict}
-        loss_dict_reduced_unscaled = {f'{k}_unscaled': v
-                                      for k, v in loss_dict_reduced.items()}
-        metric_logger.update(loss=sum(loss_dict_reduced_scaled.values()),
-                             **loss_dict_reduced_scaled,
-                             **loss_dict_reduced_unscaled)
-        metric_logger.update(class_error=loss_dict_reduced['class_error'])
+        loss_dict_reduced_scaled = {
+            k: v * weight_dict[k]
+            for k, v in loss_dict_reduced.items()
+            if k in weight_dict
+        }
+        loss_dict_reduced_unscaled = {
+            f"{k}_unscaled": v for k, v in loss_dict_reduced.items()
+        }
+        metric_logger.update(
+            loss=sum(loss_dict_reduced_scaled.values()),
+            **loss_dict_reduced_scaled,
+            **loss_dict_reduced_unscaled,
+        )
+        metric_logger.update(class_error=loss_dict_reduced["class_error"])
 
         orig_target_sizes = torch.stack([t["orig_size"] for t in targets], dim=0)
-        results = postprocessors['bbox'](outputs, orig_target_sizes)
-        if 'segm' in postprocessors.keys():
+        results = postprocessors["bbox"](outputs, orig_target_sizes)
+        if "segm" in postprocessors.keys():
             target_sizes = torch.stack([t["size"] for t in targets], dim=0)
-            results = postprocessors['segm'](results, outputs, orig_target_sizes, target_sizes)
-        res = {target['image_id'].item(): output for target, output in zip(targets, results)}
+            results = postprocessors["segm"](
+                results, outputs, orig_target_sizes, target_sizes
+            )
+        res = {
+            target["image_id"].item(): output
+            for target, output in zip(targets, results)
+        }
 
         if panoptic_evaluator is not None:
-            res_pano = postprocessors["panoptic"](outputs, target_sizes, orig_target_sizes)
+            res_pano = postprocessors["panoptic"](
+                outputs, target_sizes, orig_target_sizes
+            )
             for i, target in enumerate(targets):
                 image_id = target["image_id"].item()
                 file_name = f"{image_id:012d}.png"
@@ -285,9 +326,9 @@ def evaluate(model, criterion, postprocessors, data_loader, device, output_dir):
         panoptic_res = panoptic_evaluator.summarize()
     log_class_chart(panoptic_res)
     stats = {k: meter.global_avg for k, meter in metric_logger.meters.items()}
-    
+
     if panoptic_res is not None:
-        stats['PQ_all'] = panoptic_res["All"]
-        stats['PQ_th'] = panoptic_res["Things"]
-        stats['PQ_st'] = panoptic_res["Stuff"]
+        stats["PQ_all"] = panoptic_res["All"]
+        stats["PQ_th"] = panoptic_res["Things"]
+        stats["PQ_st"] = panoptic_res["Stuff"]
     return stats

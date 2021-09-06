@@ -2,6 +2,7 @@ import numpy as np
 import cv2
 from math import floor
 
+
 def get_overlayed_mask(image_size, annotations):
     height, width = image_size
     # # create a single channel height, width pixel black image
@@ -15,7 +16,7 @@ def get_overlayed_mask(image_size, annotations):
     # for i, annotation in enumerate(annotations):
     polygons_list = []
     # Add the polygon segmentation
-    for segmentation_points in annotations['segmentation']:
+    for segmentation_points in annotations["segmentation"]:
         segmentation_points = np.multiply(segmentation_points, 1).astype(int)
         polygons_list.append(segmentation_points)
 

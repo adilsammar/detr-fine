@@ -10,9 +10,11 @@ import requests
 import io
 import math
 import matplotlib.pyplot as plt
+
 # %config InlineBackend.figure_format = 'retina'
 import itertools
 import seaborn as sns
+
 palette = itertools.cycle(sns.color_palette())
 
 import torch
@@ -20,28 +22,37 @@ from torch import nn
 from torchvision.models import resnet50
 import torchvision.transforms as T
 import numpy as np
+
 torch.set_grad_enabled(False)
 
 import convert_to_coco
 
 
 # standard PyTorch mean-std input image normalization
-transform = T.Compose([
-    T.Resize(800),
-    T.ToTensor(),
-    T.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
-])
+transform = T.Compose(
+    [
+        T.Resize(800),
+        T.ToTensor(),
+        T.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
+    ]
+)
 
 # --- Workaround for torch issue to load detr lib ------
-os.system('git clone https://github.com/facebookresearch/detr.git')
+os.system("git clone https://github.com/facebookresearch/detr.git")
 sys.path.append(os.path.join(os.getcwd(), "detr/"))
 
 # ------------------------------------------------------
 
 
 # Load detr model
-model, postprocessor = torch.hub.load('detr', 'detr_resnet101_panoptic',
-                                      source='local', pretrained=True, return_postprocessor=True, num_classes=250)
+model, postprocessor = torch.hub.load(
+    "detr",
+    "detr_resnet101_panoptic",
+    source="local",
+    pretrained=True,
+    return_postprocessor=True,
+    num_classes=250,
+)
 # Convert to eval mode
 model.eval()
 
@@ -51,13 +62,13 @@ model.eval()
 url = "https://img2.goodfon.com/wallpaper/nbig/6/f4/rossiya-priroda-pole-zelen.jpg"
 # stream = requests.get(url, stream=True).raw
 # imo = Image.open(stream)
-imo = Image.open('./img_099.png')
+imo = Image.open("./img_099.png")
 im = imo.resize((800, 600))
 
 h, w, c = np.array(imo).shape
 
 if c == 4:
-    imo = Image.open('./img_099.png').convert('RGB')
+    imo = Image.open("./img_099.png").convert("RGB")
     im = imo.resize((800, 600))
     h, w, c = np.array(imo).shape
 
@@ -85,8 +96,10 @@ scores = out["pred_logits"].softmax(-1)[..., :-1].max(-1)[0]
 keep = scores > 0.85
 
 # Keep only ones above threshold
-pred_logits, pred_boxes = out["pred_logits"][keep][:, :len(
-    COCO_NAMES)-1], out["pred_boxes"][keep]
+pred_logits, pred_boxes = (
+    out["pred_logits"][keep][:, : len(COCO_NAMES) - 1],
+    out["pred_boxes"][keep],
+)
 
 # print(pred_logits.shape, pred_boxes.shape)
 # (torch.Size([above_threshold_preductions, classes(200)]), torch.Size([above_threshold_preductions, bb(4)]))
@@ -126,7 +139,9 @@ pred_logits, pred_boxes = out["pred_logits"][keep][:, :len(
 result = postprocessor(out, torch.as_tensor(img.shape[-2:]).unsqueeze(0))[0]
 
 # The segmentation is stored in a special-format png
-panoptic_seg = Image.open(io.BytesIO(result['png_string'])).resize((w, h), Image.NEAREST)
+panoptic_seg = Image.open(io.BytesIO(result["png_string"])).resize(
+    (w, h), Image.NEAREST
+)
 (wp, hp) = panoptic_seg.size
 # print("Height Pan", hp, "Width Pan", wp)
 panoptic_seg = np.array(panoptic_seg, dtype=np.uint8).copy()
@@ -153,17 +168,15 @@ panoptic_seg_id = rgb2id(panoptic_seg)
 # plt.show()
 
 # Convert to binary segment
-binary_masks = np.zeros((
-    panoptic_seg_id.max() + 1,
-    panoptic_seg_id.shape[0],
-    panoptic_seg_id.shape[1]),
-    dtype=np.uint8
+binary_masks = np.zeros(
+    (panoptic_seg_id.max() + 1, panoptic_seg_id.shape[0], panoptic_seg_id.shape[1]),
+    dtype=np.uint8,
 )
 
 import datetime
 import json
 
-ROOT_DIR = './'
+ROOT_DIR = "./"
 
 INFO = {
     "description": "Example Dataset",
@@ -171,14 +184,14 @@ INFO = {
     "version": "0.1.0",
     "year": 2021,
     "contributor": "adilsammar",
-    "date_created": datetime.datetime.utcnow().isoformat(' ')
+    "date_created": datetime.datetime.utcnow().isoformat(" "),
 }
 
 LICENSES = [
     {
         "id": 1,
         "name": "Attribution-NonCommercial-ShareAlike License",
-        "url": "http://creativecommons.org/licenses/by-nc-sa/2.0/"
+        "url": "http://creativecommons.org/licenses/by-nc-sa/2.0/",
     }
 ]
 
@@ -190,14 +203,14 @@ coco_output = {
     "licenses": LICENSES,
     "categories": CATEGORIES,
     "images": [],
-    "annotations": []
+    "annotations": [],
 }
 
 image_id = 1
 
 # Opening JSON file
-with open('test.json') as f:
-    # returns JSON object as 
+with open("test.json") as f:
+    # returns JSON object as
     # a dictionary
     omask = json.load(f)
 
@@ -215,11 +228,20 @@ coco_output["images"].append(image_info)
 for ans in omask["annotations"]:
     coco_output["annotations"].append(ans)
 
-for id in np.unique(panoptic_seg_id)[:-1]: # Skip the last one as it is for custom mappings
+for id in np.unique(panoptic_seg_id)[
+    :-1
+]:  # Skip the last one as it is for custom mappings
     binary_masks[id, :, :] = panoptic_seg_id == id
-    annotation_info = convert_to_coco.main(binary_masks[id], None, image_id, result['segments_info'][id]["category_id"], result['segments_info'][id]["id"], False)
+    annotation_info = convert_to_coco.main(
+        binary_masks[id],
+        None,
+        image_id,
+        result["segments_info"][id]["category_id"],
+        result["segments_info"][id]["id"],
+        False,
+    )
     if annotation_info is not None:
         coco_output["annotations"].append(annotation_info)
 
-with open('{}/instances_custom.json'.format(ROOT_DIR), 'w') as output_json_file:
+with open("{}/instances_custom.json".format(ROOT_DIR), "w") as output_json_file:
     json.dump(coco_output, output_json_file)

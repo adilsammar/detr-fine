@@ -6,6 +6,7 @@ import torch
 import torchvision
 import PIL
 from torchvision.ops.boxes import box_area
+
 if float(torchvision.__version__[:3]) < 0.7:
     from torchvision.ops import _new_empty_tensor
     from torchvision.ops.misc import _output_size
@@ -35,16 +36,15 @@ class NestedTensor(object):
 
 def box_xyxy_to_cxcywh(x):
     x0, y0, x1, y1 = x.unbind(-1)
-    b = [(x0 + x1) / 2, (y0 + y1) / 2,
-         (x1 - x0), (y1 - y0)]
+    b = [(x0 + x1) / 2, (y0 + y1) / 2, (x1 - x0), (y1 - y0)]
     return torch.stack(b, dim=-1)
 
 
 def box_cxcywh_to_xyxy(x):
     x_c, y_c, w, h = x.unbind(-1)
-    b = [(x_c - 0.5 * w), (y_c - 0.5 * h),
-         (x_c + 0.5 * w), (y_c + 0.5 * h)]
+    b = [(x_c - 0.5 * w), (y_c - 0.5 * h), (x_c + 0.5 * w), (y_c + 0.5 * h)]
     return torch.stack(b, dim=-1)
+
 
 # modified from torchvision to also return the union
 
@@ -98,7 +98,9 @@ def generalized_box_iou(boxes1, boxes2):
     return iou - (area - union) / area
 
 
-def interpolate(input, size=None, scale_factor=None, mode="nearest", align_corners=None):
+def interpolate(
+    input, size=None, scale_factor=None, mode="nearest", align_corners=None
+):
     # type: (Tensor, Optional[List[int]], Optional[float], str, Optional[bool]) -> Tensor
     """
     Equivalent to nn.functional.interpolate, but with support for empty batch sizes.
@@ -115,7 +117,9 @@ def interpolate(input, size=None, scale_factor=None, mode="nearest", align_corne
         output_shape = list(input.shape[:-2]) + list(output_shape)
         return _new_empty_tensor(input, output_shape)
     else:
-        return torchvision.ops.misc.interpolate(input, size, scale_factor, mode, align_corners)
+        return torchvision.ops.misc.interpolate(
+            input, size, scale_factor, mode, align_corners
+        )
 
 
 def nested_tensor_from_tensor_list(tensor_list: List[Tensor]):
@@ -137,10 +141,11 @@ def nested_tensor_from_tensor_list(tensor_list: List[Tensor]):
         mask = torch.ones((b, h, w), dtype=torch.bool, device=device)
         for img, pad_img, m in zip(tensor_list, tensor, mask):
             pad_img[: img.shape[0], : img.shape[1], : img.shape[2]].copy_(img)
-            m[: img.shape[1], :img.shape[2]] = False
+            m[: img.shape[1], : img.shape[2]] = False
     else:
-        raise ValueError('not supported')
+        raise ValueError("not supported")
     return NestedTensor(tensor, mask)
+
 
 # _onnx_nested_tensor_from_tensor_list() is an implementation of
 # nested_tensor_from_tensor_list() that is supported by ONNX tracing.
@@ -150,8 +155,9 @@ def nested_tensor_from_tensor_list(tensor_list: List[Tensor]):
 def _onnx_nested_tensor_from_tensor_list(tensor_list: List[Tensor]) -> NestedTensor:
     max_size = []
     for i in range(tensor_list[0].dim()):
-        max_size_i = torch.max(torch.stack(
-            [img.shape[i] for img in tensor_list]).to(torch.float32)).to(torch.int64)
+        max_size_i = torch.max(
+            torch.stack([img.shape[i] for img in tensor_list]).to(torch.float32)
+        ).to(torch.int64)
         max_size.append(max_size_i)
     max_size = tuple(max_size)
 
@@ -164,12 +170,14 @@ def _onnx_nested_tensor_from_tensor_list(tensor_list: List[Tensor]) -> NestedTen
     for img in tensor_list:
         padding = [(s1 - s2) for s1, s2 in zip(max_size, tuple(img.shape))]
         padded_img = torch.nn.functional.pad(
-            img, (0, padding[2], 0, padding[1], 0, padding[0]))
+            img, (0, padding[2], 0, padding[1], 0, padding[0])
+        )
         padded_imgs.append(padded_img)
 
         m = torch.zeros_like(img[0], dtype=torch.int, device=img.device)
         padded_mask = torch.nn.functional.pad(
-            m, (0, padding[2], 0, padding[1]), "constant", 1)
+            m, (0, padding[2], 0, padding[1]), "constant", 1
+        )
         padded_masks.append(padded_mask.to(torch.bool))
 
     tensor = torch.stack(padded_imgs)
@@ -194,11 +202,11 @@ def masks_to_boxes(masks):
     x = torch.arange(0, w, dtype=torch.float)
     y, x = torch.meshgrid(y, x)
 
-    x_mask = (masks * x.unsqueeze(0))
+    x_mask = masks * x.unsqueeze(0)
     x_max = x_mask.flatten(1).max(-1)[0]
     x_min = x_mask.masked_fill(~(masks.bool()), 1e8).flatten(1).min(-1)[0]
 
-    y_mask = (masks * y.unsqueeze(0))
+    y_mask = masks * y.unsqueeze(0)
     y_max = y_mask.flatten(1).max(-1)[0]
     y_min = y_mask.masked_fill(~(masks.bool()), 1e8).flatten(1).min(-1)[0]
 
