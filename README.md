@@ -16,7 +16,7 @@
 	* 4.1. [Prepare Code](#PrepareCode)
 	* 4.2. [Train Model](#TrainModel)
 5. [Example Predictions](#ExamplePredictions)
-6. [References:](#References:)
+6. [References](#References)
 
 <!-- vscode-markdown-toc-config
 	numbering=true
@@ -1078,6 +1078,6 @@ You can find some of example predictions here [./assets/predictions](./assets/pr
 
 ![vitrified_tiles_6471.jpg](./assets/predictions/vitrified_tiles_6471.jpg)
 
-##  6. <a name='References:'></a>References:
+##  6. <a name='References'></a>References
 
 * https://towardsdatascience.com/how-to-work-with-object-detection-datasets-in-coco-format-9bf4fb5848a4
