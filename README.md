@@ -1,3 +1,5 @@
+![prediction](./assets/prediction.png)
+
 # Train DETR for object detection on custom data
 
 In Computer Vision, object detection is a task where we want our model to distinguish the foreground objects from the background and predict the locations and the categories for the objects present in the image.
@@ -728,6 +730,8 @@ We implemented RICAP in side a dataloaded as follows
 ![Collage](./assets/ricap_2.jpg)
 ![Collage](./assets/ricap_3.jpg)
     
+
+## Fine Tune DETR on custom dataset
 
 ## References:
 
