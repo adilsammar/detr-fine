@@ -731,7 +731,86 @@ We implemented RICAP in side a dataloaded as follows
 ![Collage](./assets/ricap_3.jpg)
     
 
-## Fine Tune DETR on custom dataset
+## Fine Tune DETR on custom dataset for Object Detection
+
+In this section we will show how to finetune DETR to perform object detection on custom dataset.
+
+First of all thankyou to Facebook Research for providing pretrained DETR model. We will be using [detr-r50](https://dl.fbaipublicfiles.com/detr/detr-r50-e632da11.pth) to train model
+
+Following are the steps to train DETR using pretrained model, most of the content is inspired from [this](https://www.youtube.com/watch?v=RkhXoj_Vvr4) beautiful video
+
+**Step 1:** First of all download DETR code from github
+
+    git clone https://github.com/facebookresearch/detr.git
+    cd detr
+
+**Step 2:** Download pretrained model and put into a directory named weights we will use this to start our training from
+
+    mkdir weights
+    cd weights
+    wget https://dl.fbaipublicfiles.com/detr/detr-r50-e632da11.pth
+
+
+**Step 3:** Now we have to create a custom dataloader file the code for which can be found [detr/datasets/construction.py](detr/datasets/construction.py)
+
+**Step 4:** Now we need to make some changes to `/detr/main.py` file starting line no 172 in resume we will add certain lines of code to make sure we do not receive any error. As we are changing number or queries from default number 100 to 20 we will see some errors
+
+Update Number of queries at line no 55
+    
+    parser.add_argument('--num_queries', default=20, type=int,
+                        help="Number of query slots")
+
+
+Update Preloading code at line no 172
+
+    if args.resume:
+        if args.resume.startswith('https'):
+            checkpoint = torch.hub.load_state_dict_from_url(
+                args.resume, map_location='cpu', check_hash=True)
+        else:
+            checkpoint = torch.load(args.resume, map_location='cpu')
+            
+        del checkpoint['model']['class_embed.weight']
+        del checkpoint['model']['class_embed.bias']
+        del checkpoint['model']['query_embed.weight']
+        
+        model_without_ddp.load_state_dict(checkpoint['model'], strict=False)
+        
+        if not args.eval and 'optimizer' in checkpoint and 'lr_scheduler' in checkpoint and 'epoch' in checkpoint:
+            optimizer.load_state_dict(checkpoint['optimizer'])
+            lr_scheduler.load_state_dict(checkpoint['lr_scheduler'])
+            args.start_epoch = checkpoint['epoch'] + 1
+
+
+
+**Step 5:** We will add a new condition to dataset builder to use our custom dataset file, go to [detr/datasets/__init__.py](detr/datasets/__init__.py) and replace build_dataset function 
+
+    from .construction import build as build_construction
+    
+    def build_dataset(image_set, args):
+        if args.dataset_file == 'coco':
+            return build_coco(image_set, args)
+        if args.dataset_file == 'construction':
+            return build_construction(image_set, args)
+        if args.dataset_file == 'coco_panoptic':
+            # to avoid making panopticapi required for coco
+            from .coco_panoptic import build as build_coco_panoptic
+            return build_coco_panoptic(image_set, args)
+        raise ValueError(f'dataset {args.dataset_file} not supported')
+
+**Step 6:** Finally We will update build function in `detr/models/detr.ph` to take care of number of classes at line 313
+
+    # num_classes = 20 if args.dataset_file != 'coco' else 91
+    if args.dataset_file == "construction":
+        num_classes = 70
+    # if args.dataset_file == "coco_panoptic":
+        # # for panoptic, we just add a num_classes that is large enough to hold
+        # # max_obj_id + 1, but the exact value doesn't really matter
+        # num_classes = 250
+
+
+
+With all these updates we are ready to train our model.
 
 ## References:
 
