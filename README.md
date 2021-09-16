@@ -582,6 +582,10 @@ We will use following script to do so
 
 Finally we have our custom dataset which contains custom things categories with stuff categories from coco dataset.
 
+Example Mask Image
+![Rmc Batching Plant](./assets/rmc_batching_plant_5155.jpg)
+![Rmc Batching Plant Mask](./assets/rmc_batching_plant_5155.png)
+
 
 ## References:
 
