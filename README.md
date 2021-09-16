@@ -1,4 +1,28 @@
+
 ![prediction](./assets/prediction.png)
+
+<!-- vscode-markdown-toc -->
+1. [COCO Format for Object detection](#COCOFormatforObjectdetection)
+	* 1.1. [COCO file format](#COCOfileformat)
+	* 1.2. [Folder Structure](#FolderStructure)
+	* 1.3. [JSON format](#JSONformat)
+2. [Creating a Custom COCO format dataset](#CreatingaCustomCOCOformatdataset)
+	* 2.1. [Background](#Background)
+	* 2.2. [Add Masks for Stuff Classes](#AddMasksforStuffClasses)
+	* 2.3. [Example Mask Image](#ExampleMaskImage)
+3. [Implement RICAP](#ImplementRICAP)
+	* 3.1. [Example RICAP Images](#ExampleRICAPImages)
+4. [Fine Tune DETR on custom dataset for Object Detection](#FineTuneDETRoncustomdatasetforObjectDetection)
+	* 4.1. [Prepare Code](#PrepareCode)
+	* 4.2. [Train Model](#TrainModel)
+5. [Example Predictions](#ExamplePredictions)
+6. [References:](#References:)
+
+<!-- vscode-markdown-toc-config
+	numbering=true
+	autoSave=true
+	/vscode-markdown-toc-config -->
+<!-- /vscode-markdown-toc -->
 
 # Train DETR for object detection on custom data
 
@@ -13,7 +37,7 @@ In the results, the DETR achieved comparable performances. More precisely, DETR 
 
 The Defacto standard to train any object detection model is to use COCO format. To train our model for object detection task we have to prepare our dataset in standard coco format
 
-## COCO Format for Object detection
+##  1. <a name='COCOFormatforObjectdetection'></a>COCO Format for Object detection
 
 Microsoft's Common Objects in Context dataset (COCO) is the most popular object detection dataset at the moment. It is widely used to benchmark the performance of computer vision methods.
 
@@ -21,12 +45,12 @@ Due to the popularity of the dataset, the format that COCO uses to store annotat
 
 The “COCO format” is a specific JSON structure dictating how labels and metadata are saved for an image dataset.
 
-### COCO file format
+###  1.1. <a name='COCOfileformat'></a>COCO file format
 
 If you are new to the object detection space and are tasked with creating a new object detection dataset, then following the [COCO format](https://cocodataset.org/#format-data) is a good choice due to its relative simplicity and widespread usage. This section will explain what the file and folder structure of a COCO formatted object detection dataset actually looks like.
 At a high level, the COCO format defines exactly how your annotations (bounding boxes, object classes, etc) and image metadata (like height, width, image sources, etc) are stored on disk.
 
-### Folder Structure
+###  1.2. <a name='FolderStructure'></a>Folder Structure
 
 The folder structure of a COCO dataset looks like this:
 
@@ -40,7 +64,7 @@ The folder structure of a COCO dataset looks like this:
 
 The dataset is stored in a directory containing your raw image data and a single json file that contains all of the annotations, metadata, categories, and other information that you could possibly want to store about your dataset. If you have multiple splits of data, they would be stored in different directories with different json files.
 
-### JSON format
+###  1.3. <a name='JSONformat'></a>JSON format
 
 If you were to download the [COCO dataset from their website](https://cocodataset.org/#download), this would be the `instances_train2017.json` and `instances_val2017.json` files.
 
@@ -107,9 +131,9 @@ If you were to download the [COCO dataset from their website](https://cocodatase
 * **Annotations** — List of annotations each with a unique ID and the image ID it relates to. This is where you will store the bounding box information in our case or segmentation/keypoint/other label information for other tasks. This also stores bounding box area and iscrowd indicating a large bounding box surrounding multiple objects of the same category which is used for evaluation.
 
 
-## Creating a Custom COCO format dataset
+##  2. <a name='CreatingaCustomCOCOformatdataset'></a>Creating a Custom COCO format dataset
 
-### Background
+###  2.1. <a name='Background'></a>Background
  
 If you only have unlabeled images, then you will first need to generate object labels. You can generate either ground truth labels with an annotation tool or provider (like CVAT, Labelbox, MTurk, or one of many others) or predicted labels with an existing pretrained model.
 
@@ -215,7 +239,7 @@ From the above image we took all low level categories and mapped them to high le
 
 What ever we have done till now is the most easy task, now the most important step is to find masks and bounding boxes for these mentioned categories in out custom dataset images.
 
-### Add Masks for Stuff Classes
+###  2.2. <a name='AddMasksforStuffClasses'></a>Add Masks for Stuff Classes
 
 As we already know DETR is trained to find both stuffs and things classes. We will use pretrained DETR model to predict these low level stuff classes and map them to highlevel stuff classes.
 
@@ -584,13 +608,13 @@ We will use following script to do so
 
 Finally we have our custom dataset which contains custom things categories with stuff categories from coco dataset.
 
-### Example Mask Image
+###  2.3. <a name='ExampleMaskImage'></a>Example Mask Image
 
 ![Rmc Batching Plant](./assets/rmc_batching_plant_5155.jpg)
 ![Rmc Batching Plant Mask](./assets/rmc_batching_plant_5155.png)
 
 
-## Implement RICAP
+##  3. <a name='ImplementRICAP'></a>Implement RICAP
 
 From the above explanation it is clear that each image contains annotation for one of the class custom category and stuff category. But in real life scenario it is not always an ideal situation where we will always have ove category per class, for an example a room can have tiles, paint, furniture, switchboard etc. 
 
@@ -724,14 +748,14 @@ We implemented RICAP in side a dataloaded as follows
         return collage_image, collage_target
 
 
-### Example RICAP Images
+###  3.1. <a name='ExampleRICAPImages'></a>Example RICAP Images
 
 ![Collage](./assets/ricap_1.jpg)
 ![Collage](./assets/ricap_2.jpg)
 ![Collage](./assets/ricap_3.jpg)
     
 
-## Fine Tune DETR on custom dataset for Object Detection
+##  4. <a name='FineTuneDETRoncustomdatasetforObjectDetection'></a>Fine Tune DETR on custom dataset for Object Detection
 
 In this section we will show how to finetune DETR to perform object detection on custom dataset.
 
@@ -739,7 +763,7 @@ First of all thankyou to Facebook Research for providing pretrained DETR model. 
 
 Following are the steps to train DETR using pretrained model, most of the content is inspired from [this](https://www.youtube.com/watch?v=RkhXoj_Vvr4) beautiful video
 
-### Prepare Code
+###  4.1. <a name='PrepareCode'></a>Prepare Code
 
 **Step 1:** First of all download DETR code from github
 
@@ -813,7 +837,7 @@ Update Preloading code at line no 172
 
 With all these updates we are ready to train our model.
 
-### Train Model
+###  4.2. <a name='TrainModel'></a>Train Model
 
 We have trained detr model in two stages for 100 epochs in total in first stage we have trained model for 50 epochs keeping all settings constant and switching RICAP images. Later for next 50 epochs we have trained model with RICAP on for random 50% samples
 
@@ -1034,7 +1058,7 @@ Following are the outputs after different stages.
 
 
 
-## Example Predictions
+##  5. <a name='ExamplePredictions'></a>Example Predictions
 
 You can find some of example predictions here [./assets/predictions](./assets/predictions)
 
@@ -1054,6 +1078,6 @@ You can find some of example predictions here [./assets/predictions](./assets/pr
 
 ![vitrified_tiles_6471.jpg](./assets/predictions/vitrified_tiles_6471.jpg)
 
-## References:
+##  6. <a name='References:'></a>References:
 
 * https://towardsdatascience.com/how-to-work-with-object-detection-datasets-in-coco-format-9bf4fb5848a4
