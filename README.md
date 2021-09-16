@@ -582,10 +582,152 @@ We will use following script to do so
 
 Finally we have our custom dataset which contains custom things categories with stuff categories from coco dataset.
 
-Example Mask Image
+### Example Mask Image
+
 ![Rmc Batching Plant](./assets/rmc_batching_plant_5155.jpg)
 ![Rmc Batching Plant Mask](./assets/rmc_batching_plant_5155.png)
 
+
+## Implement RICAP
+
+From the above explanation it is clear that each image contains annotation for one of the class custom category and stuff category. But in real life scenario it is not always an ideal situation where we will always have ove category per class, for an example a room can have tiles, paint, furniture, switchboard etc. 
+
+But if a model is trained to only predict one class at a time in an image it will get biased and might not give good results in real world scenarios.
+
+A solution to this problem is to combine images so that they contain multiple categories in one single input. And there is not better technique than RICAP to do this.
+
+We implemented RICAP in side a dataloaded as follows
+
+**Step 1:** First update `__getitem__` to either pich normal image or collage image
+
+    class ConstructionDetection(torchvision.datasets.CocoDetection):
+        def __init__(self, img_folder, ann_file, transforms, return_masks, dataset_type):
+            super(ConstructionDetection, self).__init__(img_folder, ann_file)
+            self._transforms = transforms
+            self.prepare = ConvertConstructionPolysToMask(return_masks)
+            self.dataset_type = dataset_type
+            
+        def get_images(self):
+            collage_images = list(random.sample(self.ids, 4))
+            
+            targets = {i: [] for i in collage_images}
+            images = {i: [] for i in collage_images}
+            
+            for imid in collage_images:
+                image, target = super(ConstructionDetection, self).__getitem__(imid-1)
+                target = {'image_id': imid, 'annotations': target}
+                image, target = self.prepare(image, target)
+                targets[imid] = target
+                images[imid] = image
+                
+            return images, targets
+
+        def __getitem__(self, idx):
+            _flip = flip_coin()
+            image_id = self.ids[idx]
+            
+            if _flip or self.dataset_type == 'val':
+                img, target = super(ConstructionDetection, self).__getitem__(idx)
+            else:
+                images, targets = self.get_images()
+                img, target = prepare_collage(images, targets)
+            
+            target = {'image_id': image_id, 'annotations': target}
+            img, target = self.prepare(img, target)
+            if self._transforms is not None:
+                if self.dataset_type == 'val':
+                    img, target = self._transforms(img, target)
+                elif _flip:
+                    img, target = self._transforms[0](img, target)
+                else:
+                    img, target = self._transforms[1](img, target)
+            return img, target
+
+    def flip_coin():
+        if torch.rand(1) > 0.5:
+            return True
+        else:
+            return False
+
+
+**Step 2:** Define a function which will take in images and their annotations to create a collage out of them
+
+    def prepare_collage(imgs, targets):
+        idxs = imgs.keys()
+        try:
+
+            bbs = {i: [] for i in idxs}
+            cats = {i: [] for i in idxs}
+
+            collage_target = []
+
+            for i in idxs:
+                targets[i]["boxes"][:, 2:] -= targets[i]["boxes"][:, :2]
+                bbs[i] = targets[i]["boxes"].int().tolist()
+                cats[i]= targets[i]["labels"].int().tolist()
+
+            trans_imgs = []
+            trans_bbs = torch.tensor([])
+            trans_cats = []
+
+            transform = A.Compose(
+                [A.SmallestMaxSize(max_size=300), A.CenterCrop(width=300, height=300)],
+                bbox_params=A.BboxParams(format='coco', label_fields=['category_ids'], min_visibility=0.5),
+            )
+
+            for i in idxs:
+                image = np.array(imgs[i])
+
+                transformed = transform(image=image, bboxes=bbs[i], category_ids=cats[i])
+
+                trans_imgs.append(transformed)
+                bb_tensor = torch.tensor(transformed['bboxes'])
+
+                if len(bb_tensor) > 0:
+
+                    if i == 1:
+                        bb_tensor[:, 1]+=300
+                    if i == 2:
+                        bb_tensor[:, 0]+=300
+                    if i == 3:
+                        bb_tensor[:, 0]+=300
+                        bb_tensor[:, 1]+=300
+
+                    trans_bbs = torch.cat([trans_bbs, bb_tensor], dim=0)
+                    trans_cats += transformed['category_ids']
+
+
+            collage_image = Image.fromarray(torch.cat([
+                torch.cat([
+                    torch.tensor(trans_imgs[0]['image']), 
+                    torch.tensor(trans_imgs[1]['image'])
+                ], dim=0),
+                torch.cat([
+                    torch.tensor(trans_imgs[2]['image']), 
+                    torch.tensor(trans_imgs[3]['image'])
+                ], dim=0)
+            ], dim=1).detach().numpy())
+
+            for bb, cid, ar in zip(trans_bbs, trans_cats, trans_bbs[:, 2] * trans_bbs[:, 3]):
+                collage_target.append({
+                'bbox': bb.tolist(),
+                'category_id': cid,
+                'area': ar
+            })
+                
+        except Exception as e:
+            logging.error(idxs)
+            raise e
+        
+        return collage_image, collage_target
+
+
+### Example RICAP Images
+
+![Collage](./assets/ricap_1.jpg)
+![Collage](./assets/ricap_2.jpg)
+![Collage](./assets/ricap_3.jpg)
+    
 
 ## References:
 
