@@ -411,9 +411,176 @@ We will use following script to do so
                 # the post-processor expects as input the target size of the predictions (which we set here to the image size)
                 result = postprocessor(out, torch.as_tensor(img.shape[-2:]).unsqueeze(0))[0]
 
+**Step 12:** These postprocessed results contain mask image as a png_string, lets load this string as an image
+
+                # The segmentation is stored in a special-format png
+                panoptic_seg = Image.open(io.BytesIO(result['png_string'])).resize((w, h), Image.NEAREST)
+                # (wp, hp) = panoptic_seg.size
+                panoptic_seg = np.array(panoptic_seg, dtype=np.uint8).copy()
+
+                # We retrieve the ids corresponding to each mask
+                panoptic_seg_id = rgb2id(panoptic_seg)
 
 
+**Step 13:** In this step we will overlay the predictions with our own custom masks.
 
+                ## Merge predicted annotations
+            
+                # 1. Get Mapping from predicted id to new ids
+                ## 1. Merge segment ids
+                unique_category_id = []
+                for i, segment in enumerate(result['segments_info']):
+                    result['segments_info'][i]["category_id"] = MAPPINGS[result['segments_info'][i]["category_id"]]
+                    if result['segments_info'][i]["category_id"] not in unique_category_id:
+                        unique_category_id.append(result['segments_info'][i]["category_id"])
+                
+                # Sort array
+                unique_category_id.sort()
+                
+                unique_category_id_to_id =  {category_id: i for i, category_id in enumerate(unique_category_id)}
+                unique_id_to_category_id =  {i: category_id for category_id, i in unique_category_id_to_id.items()}
+                
+                for i, segment in enumerate(result['segments_info']):
+                    result['segments_info'][i]["new_id"] = unique_category_id_to_id[result['segments_info'][i]["category_id"]]
+                
+                # Update original panoptic_seg_id array with new ids as the new segmentation combines different categories.
+                custom_panoptic_seg_id = np.zeros((panoptic_seg_id.shape[0], panoptic_seg_id.shape[1]), dtype=np.uint8)
+                
+                # Update this custom panoptic seg matrix
+                for i, segment in enumerate(result['segments_info']):
+                    custom_panoptic_seg_id[result['segments_info'][i]['id'] == panoptic_seg_id] = result['segments_info'][i]['new_id']
+
+**Step 14:** Once we have new mask array its time to get segments for each category.
+
+                custom_panoptic_segments_info = []
+                for category_id in unique_category_id:
+                    custom_panoptic_segments_info.append({
+                        'segment_id': unique_category_id_to_id[category_id], 
+                        'category_id': category_id,
+                        'bbox': [],
+                        'area': 0,
+                        'iscroud': 0,
+                        'isthing': 0
+                    })
+
+                # annotations of our construction things
+                omask = processing_data['annotations']
+                
+                TEMP_ANNOTATIONS = []
+                
+                # Overlay things mask one at a time
+                for annotation in omask:
+                    # overlay mask of construction things on top of detr output
+                    omask_image_id = overlay_custom_mask.get_overlayed_mask((h, w), annotation)
+                    custom_panoptic_seg_id[omask_image_id.astype(np.bool_)] = custom_panoptic_seg_id.max() + 1
+                    custom_panoptic_segments_info.append({
+                        'segment_id': custom_panoptic_seg_id.max(), 
+                        'category_id': cat2id[category_name], 
+                        'bbox': annotation['bbox'],
+                        'area': annotation['area'],
+                        'iscroud': 0,
+                        'isthing': 1
+                    })
+
+                    # append annotation of construction things in json file
+                    annotation["category_id"] = cat2id[category_name]
+                    annotation["image_id"] = image_id
+                    TEMP_ANNOTATIONS.append(annotation)
+                
+                # Convert to binary segment
+                binary_masks = np.zeros((
+                    custom_panoptic_seg_id.max() + 1,
+                    custom_panoptic_seg_id.shape[0],
+                    custom_panoptic_seg_id.shape[1]),
+                    dtype=np.uint8
+                )
+
+                # for each binary mask, detect contours and create annotation for those contours
+                if len(unique_category_id):
+                    # Skip the onse which are added by us
+                    for category_id in unique_category_id:
+                        binary_masks[unique_category_id_to_id[category_id], :, :] = custom_panoptic_seg_id == unique_category_id_to_id[category_id]
+                        annotation_info = convert_to_coco.main(binary_masks[unique_category_id_to_id[category_id]], None, image_id, category_id, unique_category_id_to_id[category_id], 0)
+                        if annotation_info is not None:
+                            annotation_info["image_id"] = image_id
+                            annotation_info["category_id"] = category_id
+                            TEMP_ANNOTATIONS.append(annotation_info)
+                            
+                            custom_panoptic_segments_info[unique_category_id_to_id[category_id]]['bbox'] = annotation_info['bbox']
+                            custom_panoptic_segments_info[unique_category_id_to_id[category_id]]['area'] = annotation_info['area']
+                else:
+                    # Do something for the once where there are no predictions
+                    ## Probably mark them as None
+                    pass
+
+**Step 15:** Finally we have what we needed ie Bounding Box, Segmentations, Mask Image, so we will finally put all together into right format
+
+                # Write data to global json and save files to image dir's
+            
+                # save image to new path as .jpg
+                imo.save(output_file_path)
+                
+                # save panoptic image
+                Image.fromarray(id2rgb(custom_panoptic_seg_id), 'RGB').save(output_mask_path)
+
+                # create image_info object and append it to original list
+                image_info = coco_creator_tools.create_image_info(image_id, output_file_name, imo.size)
+                image_info["original_file"] = processing_file
+
+                GLOBAL_COCO["images"].append(image_info)
+                GLOBAL_PANOPTIC["images"].append(image_info)
+
+                for annotation in TEMP_ANNOTATIONS:
+                    annotation["id"] = annotation_id
+                    GLOBAL_COCO["annotations"].append(annotation)
+                    annotation_id += 1
+                    
+                for segment_info in custom_panoptic_segments_info:
+                    segment_info["id"] = segment_id
+                    segment_id += 1
+                    
+                GLOBAL_PANOPTIC["annotations"].append({
+                    "segments_info": custom_panoptic_segments_info,
+                    "file_name": output_mask_name,
+                    "image_id": image_id
+                })
+
+                # increment the image_count
+                image_id += 1
+            
+            except Exception as e:
+                # if there is any error, add info about it in errros file and procees to next image
+                print("Error occurred while processig file:", processing_file)
+                
+                with open(os.path.join(ROOT_DIR, "error.json"), 'r') as error_file:
+                    error_json = json.load(error_file)
+                    
+                with open(os.path.join(ROOT_DIR, "error.json"), 'w') as error_file:
+                    error_json["error"].append({
+                        "processing_file": processing_file,
+                        "processing_data": processing_data
+                    })
+                    
+                    json.dump(error_json, error_file)
+                    
+                traceback.print_exc()
+
+**Step 16:** Finally write everything to json
+
+        total_time_str = str(datetime.timedelta(seconds=int(time.time() - start)))
+        print(f"Completed Category: {category_name}, Time Taken: {total_time_str}")
+
+        # open the final json, and commit changes in that file
+        with open(os.path.join(ROOT_DIR, "coco.json"), 'w') as output_json_file:
+            json.dump(GLOBAL_COCO, output_json_file)
+            
+        with open(os.path.join(ROOT_DIR, "panoptic.json"), 'w') as output_json_file:
+            json.dump(GLOBAL_PANOPTIC, output_json_file, default=convert)
+            
+        print(image_id, annotation_id, segment_id)
+
+
+Finally we have our custom dataset which contains custom things categories with stuff categories from coco dataset.
 
 
 ## References:
