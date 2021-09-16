@@ -73,7 +73,7 @@ args.coco_panoptic_path = "./data"
 args.lr = 1e-4
 args.weight_decay = 1e-4
 args.lr_backbone = 0  # 0 means frozen backbone
-args.batch_size = 1
+args.batch_size = 3
 args.epochs = 2
 args.lr_drop = 200
 args.clip_max_norm = 0.1
@@ -325,7 +325,7 @@ def train():
         dataset_train,
         batch_sampler=batch_sampler_train,
         collate_fn=collate_fn,
-        num_workers=1,
+        num_workers=4,
     )
     data_loader_val = DataLoader(
         dataset_val,
@@ -333,7 +333,7 @@ def train():
         sampler=sampler_val,
         drop_last=False,
         collate_fn=collate_fn,
-        num_workers=1,
+        num_workers=4,
     )
 
     if args.frozen_weights is not None:

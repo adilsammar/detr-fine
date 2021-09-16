@@ -260,12 +260,12 @@ def evaluate(model, criterion, postprocessors, data_loader, device, output_dir):
     header = "Test:"
 
     panoptic_evaluator = None
-    if "panoptic" in postprocessors.keys():
-        panoptic_evaluator = PanopticEvaluator(
-            data_loader.dataset.ann_file,
-            data_loader.dataset.ann_folder,
-            output_dir=os.path.join(output_dir, "panoptic_eval"),
-        )
+    # if "panoptic" in postprocessors.keys():
+    #     panoptic_evaluator = PanopticEvaluator(
+    #         data_loader.dataset.ann_file,
+    #         data_loader.dataset.ann_folder,
+    #         output_dir=os.path.join(output_dir, "panoptic_eval"),
+    #     )
 
     for samples, targets in metric_logger.log_every(data_loader, 10, header):
         samples = samples.to(device)
@@ -324,7 +324,10 @@ def evaluate(model, criterion, postprocessors, data_loader, device, output_dir):
     panoptic_res = None
     if panoptic_evaluator is not None:
         panoptic_res = panoptic_evaluator.summarize()
-    log_class_chart(panoptic_res)
+    
+    if panoptic_res:
+        log_class_chart(panoptic_res)
+        
     stats = {k: meter.global_avg for k, meter in metric_logger.meters.items()}
 
     if panoptic_res is not None:

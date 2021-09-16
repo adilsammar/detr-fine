@@ -11,7 +11,7 @@ from utils.utils import masks_to_boxes, box_xywh_to_xyxy, box_xyxy_to_cxcywh
 
 from dataset.utils import make_coco_transforms
 
-
+import logging
 class CocoPanoptic:
     def __init__(
         self, img_folder, ann_folder, ann_file, transforms=None, return_masks=True
@@ -33,6 +33,19 @@ class CocoPanoptic:
         self.ann_file = ann_file
         self.transforms = transforms
         self.return_masks = return_masks
+        
+        # annotations = []
+        # images = []
+        
+        # # Remove those images where we dont have any segmentations
+        # for ann, img in zip(self.coco["annotations"], self.coco["images"]):
+        #     if len(ann["segments_info"]) > 0:
+        #         annotations.append(ann)
+        #         images.append(img)
+                
+        # self.coco["images"] = images
+        # self.coco["annotations"] = annotations
+        
 
     def __getitem__(self, idx):
         ann_info = (
@@ -60,7 +73,6 @@ class CocoPanoptic:
             )
 
         target = {}
-        target['img'] = img
         target["image_id"] = torch.tensor(
             [ann_info["image_id"] if "image_id" in ann_info else ann_info["id"]]
         )
@@ -70,17 +82,28 @@ class CocoPanoptic:
 
         # target["boxes"] = masks_to_boxes(masks)
 
-        target["boxes"] = box_xywh_to_xyxy(torch.tensor(
-            [ann["bbox"] for ann in ann_info["segments_info"]],
-            dtype=torch.int64,
-        ))
+        
+        target["boxes"] = []
 
-        target["orig_boxes"] = torch.tensor(
-            [ann["bbox"] for ann in ann_info["segments_info"]],
-            dtype=torch.int64,
-        )
+        try:
+            for ann in ann_info["segments_info"]:
+                if len(ann["bbox"]) == 4:
+                    target["boxes"].append(ann["bbox"])
+                else:
+                    target["boxes"].append([0, 0, 1, 1])
 
-        target['xyxy_boxes'] = target["boxes"]
+            target["boxes"] = box_xywh_to_xyxy(torch.tensor(target["boxes"], dtype=torch.int64))
+        
+        except Exception as e:
+            logging.error(ann_info["segments_info"])
+            raise e
+
+        # target["orig_boxes"] = torch.tensor(
+        #     [ann["bbox"] for ann in ann_info["segments_info"]],
+        #     dtype=torch.int64,
+        # )
+
+        # target['xyxy_boxes'] = target["boxes"]
 
         target["size"] = torch.as_tensor([int(h), int(w)])
         target["orig_size"] = torch.as_tensor([int(h), int(w)])
