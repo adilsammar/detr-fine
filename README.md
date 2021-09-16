@@ -215,11 +215,11 @@ What ever we have done till now is the most easy task, now the most important st
 
 ### Add Masks for Stuff Classes
 
-As we already know detr is trained to find both stuffs and things classes. We will use pretrained detr model to predict these low level stuff classes and map them to things classes.
+As we already know DETR is trained to find both stuffs and things classes. We will use pretrained DETR model to predict these low level stuff classes and map them to highlevel stuff classes.
 
 We will use following script to do so
 
-**Step 1:** Clone Detr Repo
+**Step 1:** Clone DETR Repo
 
     git clone https://github.com/facebookresearch/detr.git
 
@@ -316,9 +316,100 @@ We will use following script to do so
     }
 
 
-**Step 6:** 
+**Step 6:** Run through one categoiry at a time, first coco file for that category and parse in right format. 
 
+    ############################ Create DATASET ################################
 
+    # run through all folders in dataset
+    for category_path in category_paths:
+        # store starting time
+        start = time.time()
+        # get category name
+        category_name = category_path.split("/")[5]
+        print("Processing Category:", category_name)
+        # open category coco file
+        with open(os.path.join(category_path, "coco.json"), "r") as coco_file:
+            category_coco = json.load(coco_file)
+            
+        images_root = os.path.join(category_path, 'images')
+
+**Step 7:** Create a temperary structure for images and their respective annotations
+
+        # Process all images
+        ## 1. Create a temp json which contains each image and its annotations
+        ## 2. Run over this list
+        ### 1. Copy this image as .jpg in GLOBAL_DIR
+        ### 2. Find all segments for this image
+        ### 3. Create new anotation segment which includes annotations from custom classes
+        
+        TEMP_COCO_IMAGES = {}
+        
+        # Run over all images
+        for im in category_coco["images"]:
+            im['annotations'] = []
+            TEMP_COCO_IMAGES[im['id']] = im
+            
+        for ann in category_coco["annotations"]:
+            TEMP_COCO_IMAGES[ann['image_id']]["annotations"].append(ann)
+
+**Step 8:** Loop over one image at a time, as we are also going to save these images as `three channel .jpg` image we create their destinatio names
+
+        for i, image_coco in TEMP_COCO_IMAGES.items():
+            # get image path
+            ## This data can be used further for logging if failed while processing
+            processing_file = os.path.join(images_root, image_coco['file_name'])
+            processing_data = image_coco
+            output_file_name = category_name + "_" + str(image_id) + ".jpg"
+            output_file_path = os.path.join(ROOT_DIR, "images", output_file_name)
+            
+            output_mask_name = category_name + "_" + str(image_id) + ".png"
+            output_mask_path = os.path.join(ROOT_DIR, "masks", output_mask_name)
+
+**Step 9:** Now we will read image and convert them into RGB format with 3 channels as there might be some images which are in gray format and others might be in RGBN format.
+
+            try:
+
+                # Read this image and get shape of image
+                imo = Image.open(processing_file).convert('RGB')
+
+                try:
+                    h, w, c = np.array(imo).shape
+                except:
+                    h, w = np.array(imo).shape
+                    c = 1
+
+                # if no of channels != 3, open the image and convert it to 3 channel - RGB
+                if c == 4 or c == 1:
+                    imo = imo.convert('RGB')
+                    h, w, c = np.array(imo).shape
+
+                # Create a copy of image this will be used for further processing
+                im = imo.copy()
+
+                # Apply transform and convert image to batch
+                # mean-std normalize the input image (batch-size: 1)
+                img = transform(im).unsqueeze(0).to(device)  # [h, w, c] -> [1, c, ht, wt]
+
+**Step 10:** Now we pass this formated image to model and get predicted output
+
+                # Generate output for image
+                out = model(img)
+
+**Step 11:** Now we filter results to get all predictions above certain threshold (0.85 for us), also we pass this prediction through postprocessor to get panoptic outputs
+
+                # Generate score
+                # compute the scores, excluding the "no-object" class (the last one)
+                scores = out["pred_logits"].softmax(-1)[..., :-1].max(-1)[0]
+
+                # threshold the confidence
+                keep = scores > 0.85
+
+                # Keep only ones above threshold
+                pred_logits, pred_boxes = out["pred_logits"][keep][:, :len(
+                    COCO_NAMES) - 1], out["pred_boxes"][keep]
+
+                # the post-processor expects as input the target size of the predictions (which we set here to the image size)
+                result = postprocessor(out, torch.as_tensor(img.shape[-2:]).unsqueeze(0))[0]
 
 
 
