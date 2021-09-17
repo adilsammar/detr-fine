@@ -18,9 +18,6 @@ import random
 import numpy as np
 from PIL import Image
 
-import logging
-
-
 
 class ConstructionDetection(torchvision.datasets.CocoDetection):
     def __init__(self, img_folder, ann_file, transforms, return_masks, dataset_type):
@@ -28,32 +25,42 @@ class ConstructionDetection(torchvision.datasets.CocoDetection):
         self._transforms = transforms
         self.prepare = ConvertConstructionPolysToMask(return_masks)
         self.dataset_type = dataset_type
-        
-    def get_images(self):
-        collage_images = list(random.sample(self.ids, 4))
-        
+
+    def get_random_set(self, idx):
+        collage_images = list(random.sample(range(len(self.ids)), 3))
+
+        while idx in collage_images:
+            collage_images = list(random.sample(range(len(self.ids)), 3))
+
+        collage_images.append(idx)
+
         targets = {i: [] for i in collage_images}
         images = {i: [] for i in collage_images}
-        
+
+        return collage_images, targets, images
+
+    def get_images(self, idx):
+        collage_images, targets, images = self.get_random_set(idx)
+
         for imid in collage_images:
-            image, target = super(ConstructionDetection, self).__getitem__(imid-1)
+            image, target = super(ConstructionDetection, self).__getitem__(imid)
             target = {'image_id': imid, 'annotations': target}
             image, target = self.prepare(image, target)
             targets[imid] = target
             images[imid] = image
-            
+
         return images, targets
 
     def __getitem__(self, idx):
         _flip = flip_coin()
         image_id = self.ids[idx]
-        
+
         if _flip or self.dataset_type == 'val':
             img, target = super(ConstructionDetection, self).__getitem__(idx)
         else:
-            images, targets = self.get_images()
+            images, targets = self.get_images(idx)
             img, target = prepare_collage(images, targets)
-        
+
         target = {'image_id': image_id, 'annotations': target}
         img, target = self.prepare(img, target)
         if self._transforms is not None:
@@ -65,83 +72,77 @@ class ConstructionDetection(torchvision.datasets.CocoDetection):
                 img, target = self._transforms[1](img, target)
         return img, target
 
-    
+
 def flip_coin():
-    if torch.rand(1) > 0.5:
+    if torch.rand(1) > 1.0:
         return True
     else:
         return False
-    
+
 
 def prepare_collage(imgs, targets):
     idxs = imgs.keys()
-    try:
 
-        bbs = {i: [] for i in idxs}
-        cats = {i: [] for i in idxs}
+    bbs = {i: [] for i in idxs}
+    cats = {i: [] for i in idxs}
 
-        collage_target = []
+    collage_target = []
 
-        for i in idxs:
-            targets[i]["boxes"][:, 2:] -= targets[i]["boxes"][:, :2]
-            bbs[i] = targets[i]["boxes"].int().tolist()
-            cats[i]= targets[i]["labels"].int().tolist()
+    for i in idxs:
+        targets[i]["boxes"][:, 2:] -= targets[i]["boxes"][:, :2]
+        bbs[i] = targets[i]["boxes"].int().tolist()
+        cats[i] = targets[i]["labels"].int().tolist()
 
-        trans_imgs = []
-        trans_bbs = torch.tensor([])
-        trans_cats = []
+    trans_imgs = []
+    trans_bbs = torch.tensor([])
+    trans_cats = []
 
-        transform = A.Compose(
-            [A.SmallestMaxSize(max_size=300), A.CenterCrop(width=300, height=300)],
-            bbox_params=A.BboxParams(format='coco', label_fields=['category_ids'], min_visibility=0.5),
-        )
+    transform = A.Compose(
+        [A.SmallestMaxSize(max_size=400), A.RandomCrop(width=300, height=300)],
+        bbox_params=A.BboxParams(format='coco', label_fields=['category_ids'], min_visibility=0.2),
+    )
 
-        for i in idxs:
-            image = np.array(imgs[i])
+    for i in idxs:
+        image = np.array(imgs[i])
 
-            transformed = transform(image=image, bboxes=bbs[i], category_ids=cats[i])
+        transformed = transform(image=image, bboxes=bbs[i], category_ids=cats[i])
 
-            trans_imgs.append(transformed)
-            bb_tensor = torch.tensor(transformed['bboxes'])
+        trans_imgs.append(transformed)
+        bb_tensor = torch.tensor(transformed['bboxes'])
 
-            if len(bb_tensor) > 0:
+        if len(bb_tensor) > 0:
 
-                if i == 1:
-                    bb_tensor[:, 1]+=300
-                if i == 2:
-                    bb_tensor[:, 0]+=300
-                if i == 3:
-                    bb_tensor[:, 0]+=300
-                    bb_tensor[:, 1]+=300
+            if i == 1:
+                bb_tensor[:, 1] += 300
+            if i == 2:
+                bb_tensor[:, 0] += 300
+            if i == 3:
+                bb_tensor[:, 0] += 300
+                bb_tensor[:, 1] += 300
 
-                trans_bbs = torch.cat([trans_bbs, bb_tensor], dim=0)
-                trans_cats += transformed['category_ids']
+            trans_bbs = torch.cat([trans_bbs, bb_tensor], dim=0)
+            trans_cats += transformed['category_ids']
 
+    collage_image = Image.fromarray(torch.cat([
+        torch.cat([
+            torch.tensor(trans_imgs[0]['image']),
+            torch.tensor(trans_imgs[1]['image'])
+        ], dim=0),
+        torch.cat([
+            torch.tensor(trans_imgs[2]['image']),
+            torch.tensor(trans_imgs[3]['image'])
+        ], dim=0)
+    ], dim=1).detach().numpy())
 
-        collage_image = Image.fromarray(torch.cat([
-            torch.cat([
-                torch.tensor(trans_imgs[0]['image']), 
-                torch.tensor(trans_imgs[1]['image'])
-            ], dim=0),
-            torch.cat([
-                torch.tensor(trans_imgs[2]['image']), 
-                torch.tensor(trans_imgs[3]['image'])
-            ], dim=0)
-        ], dim=1).detach().numpy())
-
-        for bb, cid, ar in zip(trans_bbs, trans_cats, trans_bbs[:, 2] * trans_bbs[:, 3]):
-            collage_target.append({
+    for bb, cid, ar in zip(trans_bbs, trans_cats, trans_bbs[:, 2] * trans_bbs[:, 3]):
+        collage_target.append({
             'bbox': bb.tolist(),
             'category_id': cid,
             'area': ar
         })
-            
-    except Exception as e:
-        logging.error(idxs)
-        raise e
-    
+
     return collage_image, collage_target
-    
+
 
 def convert_construction_poly_to_mask(segmentations, height, width):
     masks = []
@@ -268,7 +269,9 @@ def build(image_set, args):
 
     img_folder, ann_file = PATHS[image_set]
     if image_set == 'train':
-        dataset = ConstructionDetection(img_folder, ann_file, transforms=(make_construction_transforms('train'), make_construction_transforms('val')), return_masks=args.masks, dataset_type=image_set)
+        dataset = ConstructionDetection(img_folder, ann_file, transforms=(make_construction_transforms(
+            'train'), make_construction_transforms('val')), return_masks=args.masks, dataset_type=image_set)
     else:
-        dataset = ConstructionDetection(img_folder, ann_file, transforms=make_construction_transforms(image_set), return_masks=args.masks, dataset_type=image_set)
+        dataset = ConstructionDetection(img_folder, ann_file, transforms=make_construction_transforms(
+            image_set), return_masks=args.masks, dataset_type=image_set)
     return dataset
