@@ -7,23 +7,48 @@ import torch
 from PIL import Image
 
 from panopticapi.utils import rgb2id
-from util.box_ops import masks_to_boxes
+# from util.box_ops import masks_to_boxes
 
-from .coco import make_coco_transforms
+from .construction import make_construction_transforms
+
+import logging
 
 
-class CocoPanoptic:
+def box_xywh_to_xyxy(x):
+    xs, ys, w, h = x.unbind(-1)
+    b = [xs, ys, (xs + w), (ys + h)]
+    return torch.stack(b, dim=-1)
+
+
+def masks_to_boxes(segments):
+    boxes = []
+
+    try:
+        for ann in segments:
+            if len(ann["bbox"]) == 4:
+                boxes.append(ann["bbox"])
+            else:
+                boxes.append([0, 0, 1, 1])
+
+        boxes = box_xywh_to_xyxy(torch.tensor(boxes, dtype=torch.int64))
+
+    except Exception as e:
+        logging.error(segments)
+        raise e
+
+
+class ConstructionPanoptic:
     def __init__(self, img_folder, ann_folder, ann_file, transforms=None, return_masks=True):
-        with open(ann_file, 'r') as f:
+        with open(ann_file, "r") as f:
             self.coco = json.load(f)
 
         # sort 'images' field so that they are aligned with 'annotations'
         # i.e., in alphabetical order
-        self.coco['images'] = sorted(self.coco['images'], key=lambda x: x['id'])
+        self.coco["images"] = sorted(self.coco["images"], key=lambda x: x["id"])
         # sanity check
         if "annotations" in self.coco:
-            for img, ann in zip(self.coco['images'], self.coco['annotations']):
-                assert img['file_name'][:-4] == ann['file_name'][:-4]
+            for img, ann in zip(self.coco["images"], self.coco["annotations"]):
+                assert img["file_name"][:-4] == ann["file_name"][:-4]
 
         self.img_folder = img_folder
         self.ann_folder = ann_folder
@@ -32,21 +57,28 @@ class CocoPanoptic:
         self.return_masks = return_masks
 
     def __getitem__(self, idx):
-        ann_info = self.coco['annotations'][idx] if "annotations" in self.coco else self.coco['images'][idx]
-        img_path = Path(self.img_folder) / ann_info['file_name'].replace('.png', '.jpg')
-        ann_path = Path(self.ann_folder) / ann_info['file_name']
+        ann_info = (
+            self.coco["annotations"][idx]
+            if "annotations" in self.coco
+            else self.coco["images"][idx]
+        )
+        img_path = Path(self.img_folder) / ann_info["file_name"].replace(".png", ".jpg")
+        ann_path = Path(self.ann_folder) / ann_info["file_name"]
 
-        img = Image.open(img_path).convert('RGB')
+        img = Image.open(img_path).convert("RGB")
         w, h = img.size
         if "segments_info" in ann_info:
             masks = np.asarray(Image.open(ann_path), dtype=np.uint32)
             masks = rgb2id(masks)
 
-            ids = np.array([ann['id'] for ann in ann_info['segments_info']])
+            ids = np.array([ann["id"] for ann in ann_info["segments_info"]])
             masks = masks == ids[:, None, None]
 
             masks = torch.as_tensor(masks, dtype=torch.uint8)
-            labels = torch.tensor([ann['category_id'] for ann in ann_info['segments_info']], dtype=torch.int64)
+            labels = torch.tensor(
+                [ann["category_id"] for ann in ann_info["segments_info"]],
+                dtype=torch.int64,
+            )
 
         target = {}
         target['image_id'] = torch.tensor([ann_info['image_id'] if "image_id" in ann_info else ann_info["id"]])
@@ -54,7 +86,8 @@ class CocoPanoptic:
             target['masks'] = masks
         target['labels'] = labels
 
-        target["boxes"] = masks_to_boxes(masks)
+        # Instead of finding boxes, just take the one from json info available 
+        target["boxes"] = masks_to_boxes(ann_info["segments_info"])
 
         target['size'] = torch.as_tensor([int(h), int(w)])
         target['orig_size'] = torch.as_tensor([int(h), int(w)])
@@ -78,22 +111,29 @@ class CocoPanoptic:
 
 
 def build(image_set, args):
-    img_folder_root = Path(args.coco_path)
-    ann_folder_root = Path(args.coco_panoptic_path)
-    assert img_folder_root.exists(), f'provided COCO path {img_folder_root} does not exist'
-    assert ann_folder_root.exists(), f'provided COCO path {ann_folder_root} does not exist'
-    mode = 'panoptic'
+    root = Path(args.data_path)
+    assert (
+        root.exists()
+    ), f"provided Panoptic path {root} does not exist"
+
+    mode = "panoptic"
+
     PATHS = {
-        "train": ("train2017", Path("annotations") / f'{mode}_train2017.json'),
-        "val": ("val2017", Path("annotations") / f'{mode}_val2017.json'),
+        "train": ("images", "masks", f"{mode}.json"),
+        "val": ("images", "masks", f"val_{mode}.json"),
     }
 
-    img_folder, ann_file = PATHS[image_set]
-    img_folder_path = img_folder_root / img_folder
-    ann_folder = ann_folder_root / f'{mode}_{img_folder}'
-    ann_file = ann_folder_root / ann_file
+    img_folder, ann_folder, ann_file = PATHS[image_set]
+    img_folder_path = root / img_folder
+    ann_folder_path = root / ann_folder
+    ann_file = root / ann_file
 
-    dataset = CocoPanoptic(img_folder_path, ann_folder, ann_file,
-                           transforms=make_coco_transforms(image_set), return_masks=args.masks)
+    dataset = ConstructionPanoptic(
+        img_folder_path,
+        ann_folder_path,
+        ann_file,
+        transforms=make_construction_transforms(image_set),
+        return_masks=args.masks,
+    )
 
     return dataset
