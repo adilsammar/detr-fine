@@ -35,7 +35,7 @@ The authors of this paper have evaluated DETR on one of the most popular object 
 
 In the results, the DETR achieved comparable performances. More precisely, DETR demonstrates significantly better performance on large objects. However, it didn’t perform that well on small objects.
 
-The Defacto standard to train any object detection model is to use COCO format. To train our model for object detection task we have to prepare our dataset in standard coco format
+The Defacto standard for training any object detection model is using COCO format. To train our model for object detection task we have to prepare our dataset in standard coco format
 
 ##  1. <a name='COCOFormatforObjectdetection'></a>COCO Format for Object detection
 
