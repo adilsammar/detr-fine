@@ -22,20 +22,32 @@ def box_xywh_to_xyxy(x):
 
 def masks_to_boxes(segments):
     boxes = []
+    labels = []
+    iscrowd = []
+    area = []
 
-    try:
-        for ann in segments:
-            if len(ann["bbox"]) == 4:
-                boxes.append(ann["bbox"])
-            else:
-                boxes.append([0, 0, 1, 1])
+    for ann in segments:
+        if len(ann["bbox"]) == 4:
+            boxes.append(ann["bbox"])
+            area.append(ann['area'])
+        else:
+            boxes.append([0, 0, 2, 2])
+            area.append(4)
+        labels.append(ann["category_id"])
+        iscrowd.append(ann['iscrowd'])
+    
+    if len(boxes) == 0 and len(labels) == 0:
+        boxes.append([0, 0, 2, 2])
+        labels.append(1)
+        area.append(4)
+        iscrowd.append(0)
 
-        boxes = box_xywh_to_xyxy(torch.tensor(boxes, dtype=torch.int64))
-
-    except Exception as e:
-        logging.error(segments)
-        raise e
-
+    boxes = torch.tensor(boxes, dtype=torch.int64)
+    labels = torch.tensor(labels, dtype=torch.int64)
+    iscrowd = torch.tensor(iscrowd)
+    area = torch.tensor(area)
+    boxes = box_xywh_to_xyxy(boxes)
+    return boxes, labels, iscrowd, area
 
 class ConstructionPanoptic:
     def __init__(self, img_folder, ann_folder, ann_file, transforms=None, return_masks=True):
@@ -57,48 +69,64 @@ class ConstructionPanoptic:
         self.return_masks = return_masks
 
     def __getitem__(self, idx):
-        ann_info = (
-            self.coco["annotations"][idx]
-            if "annotations" in self.coco
-            else self.coco["images"][idx]
-        )
-        img_path = Path(self.img_folder) / ann_info["file_name"].replace(".png", ".jpg")
-        ann_path = Path(self.ann_folder) / ann_info["file_name"]
-
-        img = Image.open(img_path).convert("RGB")
-        w, h = img.size
-        if "segments_info" in ann_info:
-            masks = np.asarray(Image.open(ann_path), dtype=np.uint32)
-            masks = rgb2id(masks)
-
-            ids = np.array([ann["id"] for ann in ann_info["segments_info"]])
-            masks = masks == ids[:, None, None]
-
-            masks = torch.as_tensor(masks, dtype=torch.uint8)
-            labels = torch.tensor(
-                [ann["category_id"] for ann in ann_info["segments_info"]],
-                dtype=torch.int64,
+        try:
+            ann_info = (
+                self.coco["annotations"][idx]
+                if "annotations" in self.coco
+                else self.coco["images"][idx]
             )
+            img_path = Path(self.img_folder) / ann_info["file_name"].replace(".png", ".jpg")
+            ann_path = Path(self.ann_folder) / ann_info["file_name"]
 
-        target = {}
-        target['image_id'] = torch.tensor([ann_info['image_id'] if "image_id" in ann_info else ann_info["id"]])
-        if self.return_masks:
-            target['masks'] = masks
-        target['labels'] = labels
+            img = Image.open(img_path).convert("RGB")
+            w, h = img.size
+            if "segments_info" in ann_info:
+                masks = np.asarray(Image.open(ann_path), dtype=np.uint32)
+                masks = rgb2id(masks)
 
-        # Instead of finding boxes, just take the one from json info available 
-        target["boxes"] = masks_to_boxes(ann_info["segments_info"])
+                ids = np.array([ann["id"] for ann in ann_info["segments_info"]])
+                masks = masks == ids[:, None, None]
 
-        target['size'] = torch.as_tensor([int(h), int(w)])
-        target['orig_size'] = torch.as_tensor([int(h), int(w)])
-        if "segments_info" in ann_info:
-            for name in ['iscrowd', 'area']:
-                target[name] = torch.tensor([ann[name] for ann in ann_info['segments_info']])
+                masks = torch.as_tensor(masks, dtype=torch.uint8)
+                
+                # labels = torch.tensor(
+                #     [ann["category_id"] for ann in ann_info["segments_info"]],
+                #     dtype=torch.int64,
+                # )
 
-        if self.transforms is not None:
-            img, target = self.transforms(img, target)
 
-        return img, target
+            target = {}
+            target['image_id'] = torch.tensor([ann_info['image_id'] if "image_id" in ann_info else ann_info["id"]])
+            if self.return_masks:
+                target['masks'] = masks
+
+            boxes, labels, iscrowd, area = masks_to_boxes(ann_info["segments_info"])
+
+            target['labels'] = labels
+
+            # Instead of finding boxes, just take the one from json info available 
+            # target["boxes"] = masks_to_boxes(ann_info["segments_info"])
+            target["boxes"] = boxes
+
+
+            target['size'] = torch.as_tensor([int(h), int(w)])
+            target['orig_size'] = torch.as_tensor([int(h), int(w)])
+
+            target['iscrowd'] = iscrowd
+            target['area'] = area
+            # if "segments_info" in ann_info:
+            #     for name in ['iscrowd', 'area']:
+            #         target[name] = torch.tensor([ann[name] for ann in ann_info['segments_info']])
+
+            if self.transforms is not None:
+                img, target = self.transforms(img, target)
+
+            return img, target
+
+        except Exception as e:
+            logging.error(ann_info)
+            raise e
+
 
     def __len__(self):
         return len(self.coco['images'])
@@ -119,8 +147,8 @@ def build(image_set, args):
     mode = "panoptic"
 
     PATHS = {
-        "train": ("images", "masks", f"{mode}.json"),
-        "val": ("images", "masks", f"val_{mode}.json"),
+        "train": ("images", f"{mode}", f"{mode}.json"),
+        "val": ("images", f"val_{mode}", f"val_{mode}.json"),
     }
 
     img_folder, ann_folder, ann_file = PATHS[image_set]

@@ -64,17 +64,18 @@ class ConstructionDetection(torchvision.datasets.CocoDetection):
         target = {'image_id': image_id, 'annotations': target}
         img, target = self.prepare(img, target)
         if self._transforms is not None:
-            if self.dataset_type == 'val':
-                img, target = self._transforms(img, target)
-            elif _flip:
-                img, target = self._transforms[0](img, target)
-            else:
-                img, target = self._transforms[1](img, target)
+            img, target = self._transforms(img, target)
+#             if self.dataset_type == 'val':
+#                 img, target = self._transforms(img, target)
+#             elif _flip:
+#                 img, target = self._transforms[0](img, target)
+#             else:
+#                 img, target = self._transforms[1](img, target)
         return img, target
 
 
 def flip_coin():
-    if torch.rand(1) > 1.0:
+    if torch.rand(1) > 0.5:
         return True
     else:
         return False
@@ -268,10 +269,13 @@ def build(image_set, args):
     }
 
     img_folder, ann_file = PATHS[image_set]
-    if image_set == 'train':
-        dataset = ConstructionDetection(img_folder, ann_file, transforms=(make_construction_transforms(
-            'train'), make_construction_transforms('val')), return_masks=args.masks, dataset_type=image_set)
-    else:
-        dataset = ConstructionDetection(img_folder, ann_file, transforms=make_construction_transforms(
+#     if image_set == 'train':
+#         dataset = ConstructionDetection(img_folder, ann_file, transforms=make_construction_transforms(
+#             image_set), return_masks=args.masks, dataset_type=image_set)
+#     else:
+#         dataset = ConstructionDetection(img_folder, ann_file, transforms=make_construction_transforms(
+#             image_set), return_masks=args.masks, dataset_type=image_set)
+        
+    dataset = ConstructionDetection(img_folder, ann_file, transforms=make_construction_transforms(
             image_set), return_masks=args.masks, dataset_type=image_set)
     return dataset

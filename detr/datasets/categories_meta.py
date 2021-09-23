@@ -543,3 +543,99 @@ for category in CUSTOM_CATEGORIES_NAMES:
 cat2id = {category["name"]: category["id"] for category in NEW_CATEGORIES}
 
 id2cat = {i: name for name, i in cat2id.items()}
+
+from detectron2.data import MetadataCatalog
+
+def _get_construction_instances_meta():
+    thing_ids = [k["id"] for k in NEW_CATEGORIES if k["isthing"] == 1]
+    thing_colors = [k["color"] for k in NEW_CATEGORIES if k["isthing"] == 1]
+    assert len(thing_ids) == 48, len(thing_ids)
+    # Mapping from the incontiguous Construction category id to an id in [0, 47]
+    thing_dataset_id_to_contiguous_id = {k: i for i, k in enumerate(thing_ids)}
+    thing_classes = [k["name"] for k in NEW_CATEGORIES if k["isthing"] == 1]
+    ret = {
+        "thing_dataset_id_to_contiguous_id": thing_dataset_id_to_contiguous_id,
+        "thing_classes": thing_classes,
+        "thing_colors": thing_colors,
+    }
+    return ret
+
+
+def _get_construction_panoptic_separated_meta():
+    """
+    Returns metadata for "separated" version of the panoptic segmentation dataset.
+    """
+    stuff_ids = [k["id"] for k in NEW_CATEGORIES if k["isthing"] == 0]
+    assert len(stuff_ids) == 16, len(stuff_ids)
+
+    # For semantic segmentation, this mapping maps from contiguous stuff id
+    # (in [0, 53], used in models) to ids in the dataset (used for processing results)
+    # The id 0 is mapped to an extra category "thing".
+    stuff_dataset_id_to_contiguous_id = {k: i + 1 for i, k in enumerate(stuff_ids)}
+    # When converting COCO panoptic annotations to semantic annotations
+    # We label the "thing" category to 0
+    stuff_dataset_id_to_contiguous_id[0] = 0
+
+    # 54 names for COCO stuff categories (including "things")
+    stuff_classes = ["things"] + [
+        k["name"]
+        for k in NEW_CATEGORIES
+        if k["isthing"] == 0
+    ]
+
+    # NOTE: I randomly picked a color for things
+    stuff_colors = [[82, 18, 128]] + [k["color"] for k in NEW_CATEGORIES if k["isthing"] == 0]
+    ret = {
+        "stuff_dataset_id_to_contiguous_id": stuff_dataset_id_to_contiguous_id,
+        "stuff_classes": stuff_classes,
+        "stuff_colors": stuff_colors,
+    }
+    ret.update(_get_construction_instances_meta())
+    return ret
+
+
+def get_builtin_metadata(dataset_name):
+    if dataset_name == "construction":
+        return _get_construction_instances_meta()
+    if dataset_name == "construction_panoptic_separated":
+        return MetadataCatalog.get("construction_panoptic_separated").set(**_get_construction_panoptic_separated_meta())
+
+    elif dataset_name == "construction_panoptic_standard":
+        meta = {}
+        # The following metadata maps contiguous id from [0, #thing categories +
+        # #stuff categories) to their names and colors. We have to replica of the
+        # same name and color under "thing_*" and "stuff_*" because the current
+        # visualization function in D2 handles thing and class classes differently
+        # due to some heuristic used in Panoptic FPN. We keep the same naming to
+        # enable reusing existing visualization functions.
+        thing_classes = [k["name"] for k in NEW_CATEGORIES]
+        thing_colors = [k["color"] for k in NEW_CATEGORIES]
+        stuff_classes = [k["name"] for k in NEW_CATEGORIES]
+        stuff_colors = [k["color"] for k in NEW_CATEGORIES]
+
+        meta["thing_classes"] = thing_classes
+        meta["thing_colors"] = thing_colors
+        meta["stuff_classes"] = stuff_classes
+        meta["stuff_colors"] = stuff_colors
+
+        # Convert category id for training:
+        #   category id: like semantic segmentation, it is the class id for each
+        #   pixel. Since there are some classes not used in evaluation, the category
+        #   id is not always contiguous and thus we have two set of category ids:
+        #       - original category id: category id in the original dataset, mainly
+        #           used for evaluation.
+        #       - contiguous category id: [0, #classes), in order to train the linear
+        #           softmax classifier.
+        thing_dataset_id_to_contiguous_id = {}
+        stuff_dataset_id_to_contiguous_id = {}
+
+        for i, cat in enumerate(NEW_CATEGORIES):
+            if cat["isthing"]:
+                thing_dataset_id_to_contiguous_id[cat["id"]] = i
+            else:
+                stuff_dataset_id_to_contiguous_id[cat["id"]] = i
+
+        meta["thing_dataset_id_to_contiguous_id"] = thing_dataset_id_to_contiguous_id
+        meta["stuff_dataset_id_to_contiguous_id"] = stuff_dataset_id_to_contiguous_id
+
+        return meta
