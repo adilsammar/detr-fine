@@ -1,4 +1,5 @@
 import datetime
+from detectron2.data import MetadataCatalog
 
 COCO_CATEGORIES = [
     {"color": [220, 20, 60], "isthing": 1, "id": 1, "name": "person"},
@@ -137,22 +138,22 @@ COCO_CATEGORIES = [
 ]
 
 NEW_CATEGORIES = [
-    {"color": [220, 20, 60], "isthing": 0, "id": 1, "name": "misc"},
-    {"color": [255, 255, 128], "isthing": 0, "id": 2, "name": "textile"},
-    {"color": [150, 100, 100], "isthing": 0, "id": 3, "name": "building"},
-    {"color": [168, 171, 172], "isthing": 0, "id": 4, "name": "rawmaterial"},
-    {"color": [146, 112, 198], "isthing": 0, "id": 5, "name": "furniture"},
-    {"color": [218, 88, 184], "isthing": 0, "id": 6, "name": "floor"},
-    {"color": [241, 129, 0], "isthing": 0, "id": 7, "name": "plant"},
-    {"color": [217, 17, 255], "isthing": 0, "id": 8, "name": "food"},
-    {"color": [124, 74, 181], "isthing": 0, "id": 9, "name": "ground"},
-    {"color": [193, 0, 92], "isthing": 0, "id": 10, "name": "structural"},
-    {"color": [60, 143, 255], "isthing": 0, "id": 11, "name": "water"},
-    {"color": [137, 54, 74], "isthing": 0, "id": 12, "name": "wall"},
-    {"color": [183, 121, 142], "isthing": 0, "id": 13, "name": "window"},
-    {"color": [146, 139, 141], "isthing": 0, "id": 14, "name": "ceiling"},
-    {"color": [70, 130, 180], "isthing": 0, "id": 15, "name": "sky"},
-    {"color": [64, 170, 64], "isthing": 0, "id": 16, "name": "solid"},
+    {"color": [51, 48, 47], "isthing": 0, "id": 1, "name": "misc"},
+    {"color": [84, 140, 125], "isthing": 0, "id": 2, "name": "textile"},
+    {"color": [117, 81, 69], "isthing": 0, "id": 3, "name": "building"},
+    {"color": [168, 163, 135], "isthing": 0, "id": 4, "name": "rawmaterial"},
+    {"color": [120, 44, 14], "isthing": 0, "id": 5, "name": "furniture"},
+    {"color": [237, 235, 230], "isthing": 0, "id": 6, "name": "floor"},
+    {"color": [100, 191, 31], "isthing": 0, "id": 7, "name": "plant"},
+    {"color": [32, 153, 147], "isthing": 0, "id": 8, "name": "food"},
+    {"color": [89, 56, 56], "isthing": 0, "id": 9, "name": "ground"},
+    {"color": [87, 83, 83], "isthing": 0, "id": 10, "name": "structural"},
+    {"color": [20, 178, 222], "isthing": 0, "id": 11, "name": "water"},
+    {"color": [224, 75, 16], "isthing": 0, "id": 12, "name": "wall"},
+    {"color": [102, 137, 145], "isthing": 0, "id": 13, "name": "window"},
+    {"color": [212, 205, 205], "isthing": 0, "id": 14, "name": "ceiling"},
+    {"color": [27, 104, 191], "isthing": 0, "id": 15, "name": "sky"},
+    {"color": [42, 45, 48], "isthing": 0, "id": 16, "name": "solid"},
 ]
 
 MAPPINGS = {
@@ -291,7 +292,7 @@ MAPPINGS = {
     200: 2,
 }
 
-## Get a list of all categories
+# Get a list of all categories
 
 COCO_NAMES = ["N/A"] * 201
 for c in COCO_CATEGORIES:
@@ -401,60 +402,54 @@ for i, c in enumerate(CLASSES):
 
 # since we are treating all things as misc and that belongs to single color class, we can use colors of other things
 AVAILABLE_COLORS = [
-    [119, 11, 32],
-    [0, 0, 142],
-    [0, 0, 230],
-    [106, 0, 228],
-    [0, 60, 100],
-    [0, 80, 100],
-    [0, 0, 70],
-    [0, 0, 192],
-    [250, 170, 30],
-    [100, 170, 30],
-    [220, 220, 0],
-    [175, 116, 175],
-    [250, 0, 30],
-    [165, 42, 42],
-    [255, 77, 255],
-    [0, 226, 252],
-    [182, 182, 255],
-    [0, 82, 0],
-    [120, 166, 157],
-    [110, 76, 0],
-    [174, 57, 255],
-    [199, 100, 0],
-    [72, 0, 118],
-    [255, 179, 240],
-    [0, 125, 92],
-    [209, 0, 151],
-    [188, 208, 182],
-    [0, 220, 176],
-    [255, 99, 164],
-    [92, 0, 73],
-    [133, 129, 255],
-    [78, 180, 255],
-    [0, 228, 0],
-    [174, 255, 243],
-    [45, 89, 255],
-    [134, 134, 103],
-    [145, 148, 174],
-    [255, 208, 186],
-    [197, 226, 255],
-    [171, 134, 1],
-    [109, 63, 54],
-    [207, 138, 255],
-    [151, 0, 95],
-    [9, 80, 61],
-    [84, 105, 51],
-    [74, 65, 105],
-    [166, 196, 102],
-    [208, 195, 210],
-    [255, 109, 65],
-    [0, 143, 149],
-    [179, 0, 194],
-    [209, 99, 106],
-    [5, 121, 0],
-    [227, 255, 205],
+    [120, 122, 122],
+    [46, 48, 99],
+    [138, 142, 227],
+    [133, 134, 153],
+    [89, 40, 99],
+    [117, 110, 76],
+    [135, 140, 59],
+    [109, 151, 176],
+    [138, 25, 29],
+    [6, 117, 71],
+    [138, 116, 61],
+    [181, 40, 120],
+    [179, 123, 155],
+    [99, 105, 125],
+    [204, 18, 18],
+    [138, 12, 12],
+    [170, 171, 149],
+    [201, 186, 12],
+    [143, 9, 11],
+    [122, 115, 115],
+    [138, 132, 83],
+    [176, 93, 46],
+    [214, 210, 208],
+    [128, 121, 117],
+    [219, 215, 213],
+    [224, 203, 193],
+    [150, 72, 69],
+    [145, 143, 142],
+    [105, 102, 101],
+    [150, 147, 90],
+    [179, 152, 57],
+    [168, 135, 19],
+    [156, 153, 145],
+    [245, 239, 223],
+    [245, 194, 59],
+    [102, 101, 100],
+    [161, 160, 159],
+    [64, 63, 62],
+    [171, 174, 176],
+    [45, 117, 43],
+    [54, 64, 54],
+    [109, 115, 109],
+    [142, 163, 142],
+    [206, 242, 206],
+    [113, 133, 113],
+    [87, 138, 148],
+    [133, 130, 52],
+    [204, 203, 182],
 ]
 
 
@@ -544,7 +539,6 @@ cat2id = {category["name"]: category["id"] for category in NEW_CATEGORIES}
 
 id2cat = {i: name for name, i in cat2id.items()}
 
-from detectron2.data import MetadataCatalog
 
 def _get_construction_instances_meta():
     thing_ids = [k["id"] for k in NEW_CATEGORIES if k["isthing"] == 1]
