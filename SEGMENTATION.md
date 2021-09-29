@@ -62,6 +62,7 @@ In our [previous article](README.md) we have shown how to create a custom datase
 
 In this step we are adding Panoptic head on top of base DETR model and train it for another 150 epochs. But in this part we will train panoptic head with base model for first 500 epochs then we are goiong to freeze object detection model and train further for 50 epochs.
 
+### Steps
 
 **Step 1:** Create Data Loader at [detr/datasets/construction_panoptic.py](./detr/datasets/construction_panoptic.py)
 
@@ -341,7 +342,25 @@ Stuff     |  29.4   67.5   40.6    15
 ![Error](./assets/charts/pa_error.png)
 
 
+## Example Predictions
 
+You can find some of example predictions here [./assets/panoptic](./assets/panoptic)
+
+![distribution_transformer_7418.jpg](./assets/panoptic/distribution_transformer_7418.jpg)
+
+![fire_buckets_7827.jpg](./assets/panoptic/fire_buckets_7827.jpg)
+
+![grader_8467.jpg](./assets/panoptic/grader_8467.jpg)
+
+![hoist_2990.jpg](./assets/panoptic/hoist_2990.jpg)
+
+![sanitary_fixtures_1668.jpg](./assets/panoptic/sanitary_fixtures_1668.jpg)
+
+![split_units_108.jpg](./assets/panoptic/split_units_108.jpg)
+
+![transit_mixer_899.jpg](./assets/panoptic/transit_mixer_899.jpg)
+
+![vitrified_tiles_6471.jpg](./assets/panoptic/vitrified_tiles_6471.jpg)
 
 ## References
 
