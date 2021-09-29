@@ -1,15 +1,15 @@
 ![rmc_batching_plant](./assets/panoptic/rmc_batching_plant_5155.jpg)
 
 <!-- vscode-markdown-toc -->
-* 1. [What is Segmentation](#WhatisSegmentation)
+1. [What is Segmentation](#WhatisSegmentation)
 	* 1.1. [Semantic Segmentation](#SemanticSegmentation)
 	* 1.2. [Object Detection and Instance Segmentation](#ObjectDetectionandInstanceSegmentation)
 	* 1.3. [Panoptic Segmentation](#PanopticSegmentation)
-* 2. [Train DETR](#TrainDETR)
+2. [Train DETR](#TrainDETR)
 	* 2.1. [Steps](#Steps)
 	* 2.2. [Train model with panoptic head](#Trainmodelwithpanoptichead)
-* 3. [Example Predictions](#ExamplePredictions)
-* 4. [References](#References)
+3. [Example Predictions](#ExamplePredictions)
+4. [References](#References)
 
 <!-- vscode-markdown-toc-config
 	numbering=true
