@@ -71,11 +71,11 @@ We have now managed to get a representation of the original image in such a way 
 
 Training DETR is a two step process
 
-1. First [train DETR for Object detection](./README.md)
+1. First [train DETR for Object detection](./OBJECTDETECTION.md)
 2. Then add panoptic mask head and freeze base network and further train for a couple of epochs
 
 
-In our [previous article](./README.md) we have shown how to create a custom dataset from scratch and train Object Detection Model on the same. We have trained object detection model in multiple steps for around 150 epochs.
+In our [previous article](./OBJECTDETECTION.md) we have shown how to create a custom dataset from scratch and train Object Detection Model on the same. We have trained object detection model in multiple steps for around 150 epochs.
 
 In this step we are adding Panoptic head on top of base DETR model and train it for another 150 epochs. But in this part we will train panoptic head with base model for first 500 epochs then we are goiong to freeze object detection model and train further for 50 epochs.
 
