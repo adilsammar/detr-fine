@@ -854,56 +854,56 @@ Following are the outputs after different stages.
     Accumulating evaluation results...
     DONE (t=0.47s).
     IoU metric: bbox
-    Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.383
-    Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.495
-    Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.409
-    Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.045
-    Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.194
-    Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.422
-    Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.437
-    Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.528
-    Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.530
-    Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.082
-    Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.267
-    Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.575
+        Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.383
+        Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.495
+        Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.409
+        Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.045
+        Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.194
+        Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.422
+        Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.437
+        Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.528
+        Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.530
+        Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.082
+        Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.267
+        Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.575
     Training time 2:20:32
 
     Accumulating evaluation results...
     DONE (t=0.48s).
     IoU metric: bbox
-    Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.581
-    Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.715
-    Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.612
-    Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.153
-    Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.366
-    Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.608
-    Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.596
-    Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.709
-    Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.711
-    Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.165
-    Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.452
-    Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.745
+        Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.581
+        Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.715
+        Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.612
+        Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.153
+        Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.366
+        Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.608
+        Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.596
+        Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.709
+        Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.711
+        Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.165
+        Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.452
+        Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.745
     Training time 4:15:31
 
     Accumulating evaluation results...
     DONE (t=0.48s).
-    IoU metric: bbox
-    Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.695
-    Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.824
-    Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.739
-    Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.240
-    Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.489
-    Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.722
-    Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.675
-    Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.801
-    Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.802
-    Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.282
-    Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.583
-    Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.834
+        IoU metric: bbox
+        Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.695
+        Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.824
+        Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.739
+        Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.240
+        Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.489
+        Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.722
+        Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.675
+        Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.801
+        Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.802
+        Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.282
+        Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.583
+        Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.834
     Training time 8:35:06
 
 
-**Stage 2 Training:** In this stage we enabled RICAP and trained model for 50 epochs in total, dividing it into steps of 60, 100 epochs here we used saved model from checkpoint
+**Stage 2 Training:** In this stage we enabled RICAP and trained model for 100 epochs in total, dividing it into steps of 60, 100, 150 epochs here we used saved model from checkpoint
 
     python3 detr/main.py --dataset_file construction --epochs 20 --data_path construction/data --output_dir construction/data/output --resume construction/data/output/checkpoint.pth
 
@@ -912,151 +912,60 @@ Following are the outputs after different stages.
     Accumulating evaluation results...
     DONE (t=0.46s).
     IoU metric: bbox
-    Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.652
-    Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.794
-    Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.689
-    Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.150
-    Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.460
-    Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.672
-    Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.638
-    Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.759
-    Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.762
-    Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.188
-    Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.540
-    Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.786
+        Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.652
+        Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.794
+        Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.689
+        Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.150
+        Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.460
+        Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.672
+        Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.638
+        Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.759
+        Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.762
+        Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.188
+        Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.540
+        Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.786
     Training time 2:36:29
 
     Accumulating evaluation results...
     DONE (t=0.50s).
     IoU metric: bbox
-    Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.688
-    Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.840
-    Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.725
-    Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.166
-    Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.489
-    Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.714
-    Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.656
-    Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.785
-    Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.786
-    Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.208
-    Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.576
-    Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.813
+        Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.688
+        Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.840
+        Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.725
+        Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.166
+        Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.489
+        Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.714
+        Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.656
+        Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.785
+        Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.786
+        Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.208
+        Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.576
+        Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.813
     Training time 11:22:09
 
-
-**Final Output after 100 epochs**
-
-    {
-        "train_lr": 9.999999999999704e-05,
-        "train_class_error": 11.13777310111477,
-        "train_loss": 7.0748679395847685,
-        "train_loss_ce": 0.47363319006340443,
-        "train_loss_bbox": 0.30447620895547545,
-        "train_loss_giou": 0.3278437750831709,
-        "train_loss_ce_0": 0.5881314368715658,
-        "train_loss_bbox_0": 0.3472212653381299,
-        "train_loss_giou_0": 0.37600500862393665,
-        "train_loss_ce_1": 0.55237008775908,
-        "train_loss_bbox_1": 0.32516072706276705,
-        "train_loss_giou_1": 0.3517379571613477,
-        "train_loss_ce_2": 0.5186218701306677,
-        "train_loss_bbox_2": 0.31581294863402637,
-        "train_loss_giou_2": 0.34194779435164413,
-        "train_loss_ce_3": 0.4926084234627554,
-        "train_loss_bbox_3": 0.3095761377083486,
-        "train_loss_giou_3": 0.33506769407127457,
-        "train_loss_ce_4": 0.4794388437040514,
-        "train_loss_bbox_4": 0.3054348684740866,
-        "train_loss_giou_4": 0.329779693907326,
-        "train_loss_ce_unscaled": 0.47363319006340443,
-        "train_class_error_unscaled": 11.13777310111477,
-        "train_loss_bbox_unscaled": 0.0608952418235927,
-        "train_loss_giou_unscaled": 0.16392188754158546,
-        "train_cardinality_error_unscaled": 3.4914736962189163,
-        "train_loss_ce_0_unscaled": 0.5881314368715658,
-        "train_loss_bbox_0_unscaled": 0.06944425303549559,
-        "train_loss_giou_0_unscaled": 0.18800250431196833,
-        "train_cardinality_error_0_unscaled": 4.101626492416171,
-        "train_loss_ce_1_unscaled": 0.55237008775908,
-        "train_loss_bbox_1_unscaled": 0.06503214538207543,
-        "train_loss_giou_1_unscaled": 0.17586897858067385,
-        "train_cardinality_error_1_unscaled": 3.9997043615494414,
-        "train_loss_ce_2_unscaled": 0.5186218701306677,
-        "train_loss_bbox_2_unscaled": 0.063162589752326,
-        "train_loss_giou_2_unscaled": 0.17097389717582206,
-        "train_cardinality_error_2_unscaled": 3.8115328446199532,
-        "train_loss_ce_3_unscaled": 0.4926084234627554,
-        "train_loss_bbox_3_unscaled": 0.06191522753561084,
-        "train_loss_giou_3_unscaled": 0.16753384703563728,
-        "train_cardinality_error_3_unscaled": 3.557121799387563,
-        "train_loss_ce_4_unscaled": 0.4794388437040514,
-        "train_loss_bbox_4_unscaled": 0.06108697369913196,
-        "train_loss_giou_4_unscaled": 0.164889846953663,
-        "train_cardinality_error_4_unscaled": 3.552094690975384,
-        "test_class_error": 11.55502628326416,
-        "test_loss": 6.140124481916428,
-        "test_loss_ce": 0.3836157451570034,
-        "test_loss_bbox": 0.3225858848169446,
-        "test_loss_giou": 0.25822939176112414,
-        "test_loss_ce_0": 0.49365687247365714,
-        "test_loss_bbox_0": 0.369282574057579,
-        "test_loss_giou_0": 0.2898290537111461,
-        "test_loss_ce_1": 0.4531397996097803,
-        "test_loss_bbox_1": 0.3391037554293871,
-        "test_loss_giou_1": 0.2677661120519042,
-        "test_loss_ce_2": 0.42305747225880624,
-        "test_loss_bbox_2": 0.33201476439833644,
-        "test_loss_giou_2": 0.257948488779366,
-        "test_loss_ce_3": 0.398946150764823,
-        "test_loss_bbox_3": 0.327679091244936,
-        "test_loss_giou_3": 0.2583477924391627,
-        "test_loss_ce_4": 0.3836481772735715,
-        "test_loss_bbox_4": 0.3244562655314803,
-        "test_loss_giou_4": 0.25681708943098785,
-        "test_loss_ce_unscaled": 0.3836157451570034,
-        "test_class_error_unscaled": 11.55502628326416,
-        "test_loss_bbox_unscaled": 0.06451717694289982,
-        "test_loss_giou_unscaled": 0.12911469588056207,
-        "test_cardinality_error_unscaled": 2.6660000497102736,
-        "test_loss_ce_0_unscaled": 0.49365687247365714,
-        "test_loss_bbox_0_unscaled": 0.07385651474818587,
-        "test_loss_giou_0_unscaled": 0.14491452685557304,
-        "test_cardinality_error_0_unscaled": 3.5520000767707827,
-        "test_loss_ce_1_unscaled": 0.4531397996097803,
-        "test_loss_bbox_1_unscaled": 0.06782075129449368,
-        "test_loss_giou_1_unscaled": 0.1338830560259521,
-        "test_cardinality_error_1_unscaled": 3.210000049471855,
-        "test_loss_ce_2_unscaled": 0.42305747225880624,
-        "test_loss_bbox_2_unscaled": 0.06640295236371457,
-        "test_loss_giou_2_unscaled": 0.128974244389683,
-        "test_cardinality_error_2_unscaled": 2.8980000519752505,
-        "test_loss_ce_3_unscaled": 0.398946150764823,
-        "test_loss_bbox_3_unscaled": 0.06553581827320158,
-        "test_loss_giou_3_unscaled": 0.12917389621958136,
-        "test_cardinality_error_3_unscaled": 2.754000053703785,
-        "test_loss_ce_4_unscaled": 0.3836481772735715,
-        "test_loss_bbox_4_unscaled": 0.06489125317893922,
-        "test_loss_giou_4_unscaled": 0.12840854471549393,
-        "test_cardinality_error_4_unscaled": 2.672000054717064,
-        "test_coco_eval_bbox": [
-            0.6884138366417941,
-            0.8399256198314273,
-            0.7245752109267217,
-            0.16603419686455426,
-            0.48891115281802155,
-            0.7141360017823284,
-            0.6557239102631593,
-            0.7852920544274031,
-            0.7862828597078847,
-            0.20753684082328586,
-            0.5762838930641595,
-            0.8128154685936025
-        ],
-        "epoch": 99,
-        "n_parameters": 41276491
-    }
+    Accumulating evaluation results...
+    DONE (t=0.48s).
+    IoU metric: bbox
+        Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.692
+        Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.837
+        Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.733
+        Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.157
+        Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.479
+        Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.718
+        Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.668
+        Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.783
+        Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.784
+        Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.203
+        Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.563
+        Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.812
+    Training time 9:32:53
 
 
+**Final Output after 150 epochs**
+
+![Loss](./assets/charts/od_loss.png)
+![Loss and mAP](./assets/charts/od_loss_map.png)
+![Error](./assets/charts/od_error.png)
 
 ##  5. <a name='ExamplePredictions'></a>Example Predictions
 

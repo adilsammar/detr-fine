@@ -234,17 +234,113 @@ In this step we are adding Panoptic head on top of base DETR model and train it 
         return dataset
 
 
+**Step 2:** Update [detr/main.py](./detr/main.py), Add following at line 164
+
+    if args.dataset_file == "construction_panoptic":
+        # We also evaluate AP during panoptic training, on original construction DS
+        coco_val = datasets.construction.build("val", args)
+        base_ds = get_coco_api_from_dataset(coco_val)
+    else:
+        base_ds = get_coco_api_from_dataset(dataset_val)
 
 
-## Metrics
+**Step 3:** Comment line 183, 184, 185 which we added in previous article for deleting weights
+
+    # del checkpoint['model']['class_embed.weight']
+    # del checkpoint['model']['class_embed.bias']
+    # del checkpoint['model']['query_embed.weight']
+
+
+**Step 4:** Comment line 171, 172, 173 as we are not goinng to freeze base model initially
+
+    # if args.frozen_weights is not None:
+    #     checkpoint = torch.load(args.frozen_weights, map_location='cpu')
+    #     model_without_ddp.detr.load_state_dict(checkpoint['model'])
+
+
+**Step 5:** Also comment line 190, 191 as we are not going to load optimizer state and lr scheduler state from checkpoint
+
+    # optimizer.load_state_dict(checkpoint['optimizer'])
+    # lr_scheduler.load_state_dict(checkpoint['lr_scheduler'])
+
+
+**Step 6:** Go to file [detr/models/detr.py](./detr/models/detr.py), and add following to line 314
+
+    if args.dataset_file == "construction":
+        num_classes = 70
+    if args.dataset_file == "construction_panoptic":
+        num_classes = 70
+
+
+**Step 7:** Also we have to update things map, go to line 359 and add following
+
+    if args.dataset_file == "construction_panoptic":
+            is_thing_map = {i: i >= 17 for i in range(65)}
+
+With all these updates we are ready to train our model.
+
+### Train model with panoptic head
+
+We have trained model in two steps in first step we have trained model for 100 epochs and in second step for 50 epochs. FIrst stage was trained without frozen weights and second stage was trained with frozen weights.
+
+**Stage 1 Training**
+
+    python3 detr/main.py \
+        --masks \
+        --epochs 100 \
+        --lr_drop 15 \
+        --data_path /home/ammar/projects/construction/data \
+        --dataset_file construction_panoptic \
+        --resume construction/data/output/checkpoint.pth \
+        --output_dir construction/data/output \
+        > train.log 2>&1 &
+
+Following are the results after 1st stage of training
 
 ```
+          |    PQ     SQ     RQ     N
 --------------------------------------
 All       |  46.2   71.1   60.0    59
 Things    |  52.5   72.4   67.3    44
 Stuff     |  27.9   67.4   38.4    15
+```
+
+**Stage 2 Training**
+
+Befor starting this stage we will uncomment some lines in code which we have commented previously. Go to main.py file at line 190 and 191 and uncomment it
+
+Then run following command for 
+
+    python3 detr/main.py \
+        --masks \
+        --epochs 150 \
+        --lr_drop 15 \
+        --data_path /home/ammar/projects/construction/data \
+        --dataset_file construction_panoptic \
+        --frozen_weights True \
+        --resume construction/data/output/checkpoint.pth \
+        --output_dir construction/data/output \
+        > train.log 2>&1 &
+
+
+Following are the results after 1st stage of training
 
 ```
+          |    PQ     SQ     RQ     N
+--------------------------------------
+All       |  47.9   71.8   61.2    59
+Things    |  54.2   73.2   68.2    44
+Stuff     |  29.4   67.5   40.6    15
+```
+
+
+**Final Output after 150 epochs**
+
+![Loss ](./assets/charts/pa_loss.png)
+![Loss GIOU and BBOX](./assets/charts/pa_loss_bb_giou.png)
+![Error](./assets/charts/pa_error.png)
+
+
 
 
 ## References
