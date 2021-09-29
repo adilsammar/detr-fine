@@ -307,7 +307,7 @@ We have trained model in two steps in first step we have trained model for 100 e
         --masks \
         --epochs 100 \
         --lr_drop 15 \
-        --data_path /home/ammar/projects/construction/data \
+        --data_path construction/data \
         --dataset_file construction_panoptic \
         --resume construction/data/output/checkpoint.pth \
         --output_dir construction/data/output \
@@ -333,7 +333,7 @@ Then run following command for
         --masks \
         --epochs 150 \
         --lr_drop 15 \
-        --data_path /home/ammar/projects/construction/data \
+        --data_path construction/data \
         --dataset_file construction_panoptic \
         --frozen_weights True \
         --resume construction/data/output/checkpoint.pth \
