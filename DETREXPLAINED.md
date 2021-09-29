@@ -56,8 +56,9 @@ Transformers have been widely applied on problems with sequential data, in parti
 
 ## DETR Pipeline
 
-
 ![detr_Pipeline](./assets/detr_pipeline.png)
+
+
 
 At a high level these are the tasks detr perform 
 
