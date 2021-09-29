@@ -1,4 +1,4 @@
-![rmc_batching_plant](./assets/panoptic/rmc_batching_plant_5155.png)
+![rmc_batching_plant](./assets/panoptic/rmc_batching_plant_5155.jpg)
 
 # Train DETR for Panoptic Segmentation
 
