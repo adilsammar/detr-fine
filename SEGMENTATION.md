@@ -1,5 +1,22 @@
 ![rmc_batching_plant](./assets/panoptic/rmc_batching_plant_5155.jpg)
 
+<!-- vscode-markdown-toc -->
+* 1. [What is Segmentation](#WhatisSegmentation)
+	* 1.1. [Semantic Segmentation](#SemanticSegmentation)
+	* 1.2. [Object Detection and Instance Segmentation](#ObjectDetectionandInstanceSegmentation)
+	* 1.3. [Panoptic Segmentation](#PanopticSegmentation)
+* 2. [Train DETR](#TrainDETR)
+	* 2.1. [Steps](#Steps)
+	* 2.2. [Train model with panoptic head](#Trainmodelwithpanoptichead)
+* 3. [Example Predictions](#ExamplePredictions)
+* 4. [References](#References)
+
+<!-- vscode-markdown-toc-config
+	numbering=true
+	autoSave=true
+	/vscode-markdown-toc-config -->
+<!-- /vscode-markdown-toc -->
+
 # Train DETR for Panoptic Segmentation
 
 Computer vision and scene understanding have become game-changer in today’s world. As we move forward into giving autonomous capabilities to machines to perform tasks in a human-way fashion, understanding the surroundings, objects around, and scenes becomes pivotal. 
@@ -7,8 +24,8 @@ Computer vision and scene understanding have become game-changer in today’s wo
 Panoptic segmentation combines instance segmentation and semantic segmentation to provide a more holistic understanding of a given scene than the latter two alone. In this post, I will walk you through the concept of panoptic segmentation and how it is helping machines to view the world the way we see it.
 
 
-## What is Segmentation
-### Semantic Segmentation
+##  1. <a name='WhatisSegmentation'></a>What is Segmentation
+###  1.1. <a name='SemanticSegmentation'></a>Semantic Segmentation
 
 Semantic segmentation refers to the task of classifying pixels in an image. It is done by predefining some target classes, e.g., “car”, “vegetation”, “road”, “sky”, “sidewalk”, or “background”, where “background” is in most cases a default class. Then, each pixel in the image is assigned to one of those classes. Here’s an example:
 
@@ -20,7 +37,7 @@ As you can see in the previous example, every pixel in the image was colored dep
 
 if we want to dig deeper into the type of information we can extract here. Say, for example, we want to know how many cars are in one picture. Semantic segmentation is of no help here as all we can get is a pixel-wise classification. For such a task, we need to introduce the concept of object detection and instance segmentation.
 
-### Object Detection and Instance Segmentation
+###  1.2. <a name='ObjectDetectionandInstanceSegmentation'></a>Object Detection and Instance Segmentation
 
 When we do object detection, we aim to identify bounded regions of interest within the image inside of which is an object. Such objects are countable things such as cars, people, pets, etc. It doesn’t apply to classes such as “sky” or “vegetation” since they are usually spread in different regions of the image, and you cannot count them one by one since there’s only one instance of them — there is only one “sky” not multiple.
 
@@ -38,7 +55,7 @@ So we went from a rough detection with a bounding box to a more accurate detecti
 
 Still we have no information about all the other non-instance classes such as “road”, “vegetation” or “sidewalk” as we did have it in semantic segmentation. That is when panoptic segmentation comes into play!
 
-### Panoptic Segmentation
+###  1.3. <a name='PanopticSegmentation'></a>Panoptic Segmentation
 
 As mentioned in the introduction of this post, panoptic segmentation is a combination of semantic segmentation and instance segmentation. To put it another way , with panoptic segmentation, we can obtain information such as the number of objects for every instance class (countable objects), bounding boxes, instance segmentation. But, also we get to know what class every pixel in the image belongs to using semantic segmentation. This certainly provides a more holistic understanding of a scene.
 
@@ -50,7 +67,7 @@ We have now managed to get a representation of the original image in such a way 
 
 
 
-## Train DETR
+##  2. <a name='TrainDETR'></a>Train DETR
 
 Training DETR is a two step process
 
@@ -62,7 +79,7 @@ In our [previous article](./README.md) we have shown how to create a custom data
 
 In this step we are adding Panoptic head on top of base DETR model and train it for another 150 epochs. But in this part we will train panoptic head with base model for first 500 epochs then we are goiong to freeze object detection model and train further for 50 epochs.
 
-### Steps
+###  2.1. <a name='Steps'></a>Steps
 
 **Step 1:** Create Data Loader at [detr/datasets/construction_panoptic.py](./detr/datasets/construction_panoptic.py)
 
@@ -280,7 +297,7 @@ In this step we are adding Panoptic head on top of base DETR model and train it 
 
 With all these updates we are ready to train our model.
 
-### Train model with panoptic head
+###  2.2. <a name='Trainmodelwithpanoptichead'></a>Train model with panoptic head
 
 We have trained model in two steps in first step we have trained model for 100 epochs and in second step for 50 epochs. FIrst stage was trained without frozen weights and second stage was trained with frozen weights.
 
@@ -342,7 +359,7 @@ Stuff     |  29.4   67.5   40.6    15
 ![Error](./assets/charts/pa_error.png)
 
 
-## Example Predictions
+##  3. <a name='ExamplePredictions'></a>Example Predictions
 
 You can find some of example predictions here [./assets/panoptic](./assets/panoptic)
 
@@ -362,7 +379,7 @@ You can find some of example predictions here [./assets/panoptic](./assets/panop
 
 ![vitrified_tiles_6471.jpg](./assets/panoptic/vitrified_tiles_6471.jpg)
 
-## References
+##  4. <a name='References'></a>References
 
 * [Panoptic Segmentation Explained](https://hasty.ai/blog/panoptic-segmentation-explained)
 * [END-to-END object detection (Facebook AI)](https://ai.facebook.com/blog/end-to-end-object-detection-with-transformers)
