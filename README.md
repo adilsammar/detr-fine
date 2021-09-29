@@ -989,4 +989,6 @@ You can find some of example predictions here [./assets/predictions](./assets/pr
 
 ##  6. <a name='References'></a>References
 
-* https://towardsdatascience.com/how-to-work-with-object-detection-datasets-in-coco-format-9bf4fb5848a4
+* [DETR Git REPO](https://github.com/facebookresearch/detr)
+* [how-to-work-with-object-detection-datasets-in-coco-format](https://towardsdatascience.com/how-to-work-with-object-detection-datasets-in-coco-format-9bf4fb5848a4)
+* [Facebook DETR: Transformers dive into the Object Detection World](https://towardsdatascience.com/facebook-detr-transformers-dive-into-the-object-detection-world-39d8422b53fa)
