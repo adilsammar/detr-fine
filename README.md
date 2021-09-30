@@ -4,7 +4,9 @@ In this article we will cover training Detr on custom dataset end to end. Follow
 
 Before diving into theory of how it is done lets get insipired with this video
 
-[![Construction Panoptic](https://img.youtube.com/vi/7mDA3SvYjiw/0.jpg)](https://www.youtube.com/watch?v=7mDA3SvYjiw)
+<p align="center">
+    [![Construction Panoptic](https://img.youtube.com/vi/7mDA3SvYjiw/0.jpg)](https://www.youtube.com/watch?v=7mDA3SvYjiw)
+</p>
 
 1. [COCO Format for Object detection](./OBJECTDETECTION.md#COCOFormatforObjectdetection)
 	* 1.1. [COCO file format](./OBJECTDETECTION.md#COCOfileformat)
