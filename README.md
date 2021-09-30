@@ -4,4 +4,4 @@ In this article we will cover training Detr on custom dataset end to end. Follow
 
 Before diving into theory of how it is done lets get insipired with this video
 
-[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/6CtPvF63DCQ/0.jpg)](https://www.youtube.com/watch?v=6CtPvF63DCQ)
+[![Construction Panoptic](https://img.youtube.com/vi/7mDA3SvYjiw/0.jpg)](https://www.youtube.com/watch?v=7mDA3SvYjiw)
