@@ -23,7 +23,9 @@ Before diving into theory of how it is done lets get insipired with this video
 6. [Fine Tune DETR on custom dataset for Object Detection](./OBJECTDETECTION.md#FineTuneDETRoncustomdatasetforObjectDetection)
 	* 6.1. [Prepare Code](./OBJECTDETECTION.md#PrepareCode)
 	* 6.2. [Train Model](./OBJECTDETECTION.md#TrainModel)
-7. [Train DETR for Panoptic Segmentation](#TrainDETR)
-	* 7.1. [Prepare Code](#Steps)
-	* 7.2. [Train model with panoptic head](#Trainmodelwithpanoptichead)
+7. [Example Predictions](./OBJECTDETECTION.md#ExamplePredictions)
+8. [Train DETR for Panoptic Segmentation](SEGMENTATION.md#TrainDETR)
+	* 8.1. [Prepare Code](SEGMENTATION.md#Steps)
+	* 8.2. [Train model with panoptic head](SEGMENTATION.md#Trainmodelwithpanoptichead)
+8. [Example Predictions](SEGMENTATION.md#ExamplePredictions)
 

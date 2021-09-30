@@ -5,7 +5,7 @@
 	* 1.1. [Semantic Segmentation](#SemanticSegmentation)
 	* 1.2. [Object Detection and Instance Segmentation](#ObjectDetectionandInstanceSegmentation)
 	* 1.3. [Panoptic Segmentation](#PanopticSegmentation)
-2. [Train DETR](#TrainDETR)
+2. [Train DETR for Panoptic Segmentation](#TrainDETR)
 	* 2.1. [Steps](#Steps)
 	* 2.2. [Train model with panoptic head](#Trainmodelwithpanoptichead)
 3. [Example Predictions](#ExamplePredictions)
@@ -67,11 +67,11 @@ We have now managed to get a representation of the original image in such a way 
 
 
 
-##  2. <a name='TrainDETR'></a>Train DETR
+##  2. <a name='TrainDETR'></a>Train DETR for Panoptic Segmentation
 
 Training DETR is a two step process
 
-1. First [train DETR for Object detection](./OBJECTDETECTION.md)
+1. First [train DETR for Object Detection](./OBJECTDETECTION.md)
 2. Then add panoptic mask head and freeze base network and further train for a couple of epochs
 
 
