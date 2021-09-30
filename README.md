@@ -24,6 +24,6 @@ Before diving into theory of how it is done lets get insipired with this video
 	* 6.1. [Prepare Code](./OBJECTDETECTION.md#PrepareCode)
 	* 6.2. [Train Model](./OBJECTDETECTION.md#TrainModel)
 7. [Train DETR](#TrainDETR)
-	* 2.1. [Steps](#Steps)
-	* 2.2. [Train model with panoptic head](#Trainmodelwithpanoptichead)
+	* 7.1. [Steps](#Steps)
+	* 7.2. [Train model with panoptic head](#Trainmodelwithpanoptichead)
 
