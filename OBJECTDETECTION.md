@@ -345,7 +345,7 @@ We will use following script to do so
     }
 
 
-**Step 6:** Run through one categoiry at a time, first coco file for that category and parse in right format. 
+**Step 6:** Run through one category at a time, first coco file for that category and parse in right format. 
 
     ############################ Create DATASET ################################
 
