@@ -341,7 +341,7 @@ Then run following command for
         > train.log 2>&1 &
 
 
-Following are the results after 1st stage of training
+Following are the results after 2nd stage of training
 
 ```
           |    PQ     SQ     RQ     N
