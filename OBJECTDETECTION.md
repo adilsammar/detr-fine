@@ -256,7 +256,7 @@ We will use following script to do so
     import sys
     sys.path.append(os.path.join(os.getcwd(), "detr/"))
 
-**Step 2:** Load Liberaries, some of these are included from custom code we have written.
+**Step 2:** Load Libraries, some of these are included from custom code we have written.
 
     import random
     import shutil
