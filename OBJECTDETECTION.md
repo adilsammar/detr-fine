@@ -213,7 +213,7 @@ At the end of this excercise we had a number of folders each containing json fil
     .
 
 
-As per thge standard coco format we need one `test` and one `train` file. So our next task is to combine that datset to make it one.
+As per the standard coco format we need one `test` and one `train` file. So our next task is to combine that datset to make it one.
 
 Before starting to create a consolidated dataset, the classes mentioned above just belongs to `things` category. But for a true panoptic segmentation we also need our dataset to include stuffs classes. In coco dataset following are the things and stuff classes.
 
