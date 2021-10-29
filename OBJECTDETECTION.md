@@ -625,9 +625,9 @@ But if a model is trained to only predict one class at a time in an image it wil
 
 A solution to this problem is to combine images so that they contain multiple categories in one single input. And there is not better technique than RICAP to do this.
 
-We implemented RICAP in side a dataloaded as follows
+We implemented RICAP inside a dataloader as follows
 
-**Step 1:** First update `__getitem__` to either pich normal image or collage image
+**Step 1:** First update `__getitem__` to either pick normal image or collage image
 
     class ConstructionDetection(torchvision.datasets.CocoDetection):
         def __init__(self, img_folder, ann_file, transforms, return_masks, dataset_type):
